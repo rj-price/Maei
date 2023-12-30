@@ -1,0 +1,165 @@
+---
+title: '#Cluster Analysis of candidate effector list.'
+output:
+  html_document:
+    df_print: paged
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r setup}
+
+knitr::opts_knit$set(root.dir = "/Users/u1983390/Library/CloudStorage/OneDrive-UniversityofWarwick/Research/Genomics/Projects/BBSRC-FoCeleryProject/Maei/BLASTofCombinedEffectorSet")
+
+```
+
+```{r}
+#Jamie Pike 26/3/2021
+
+#Pheatmap clusters by euclidean distance
+
+##Used as a guide for this: https://www.youtube.com/watch?v=pTeTH9bz-_s  
+
+#Set libraries 
+#install.packages("tidyverse")
+library(tidyverse)
+library(pheatmap)
+library(matrixStats)
+library(knitr)
+
+Effectors <- read.csv("./DistributionOfCanidateEffectors.csv")
+```
+
+
+```{r}
+print(Effectors)
+```
+
+
+```{r}
+#Indicate the number of rows and columns in the csv. 
+print("nrow in csv:")
+nrow(Effectors) #Should equal the number of genomes.
+print("ncolv in csv:")
+ncol(Effectors) #Should equal the number of candidate effectors. 
+```
+```{r}
+#Set Heatmap data.
+Effectors %>%
+  select(4:323) %>%
+  column_to_rownames("Isolate") -> selected_heatmap #n = 73 as we do not want to include the race data in the last column. 
+
+#Calculate the number of columns in the df.
+HeatmapData_Columns <- ncol(selected_heatmap)
+#Convert to a binary data matrix
+selected_heatmap[,1:all_of(HeatmapData_Columns)]<-ifelse(selected_heatmap[,1:all_of(HeatmapData_Columns)] >= 1, 1, 0) -> HeatmapData_Binary
+
+```
+
+```{r}
+#Build Pheatmap
+
+#(USE CMD + Shft + c to uncomment all text and look at plots which help to explain why the heatmap must be transformed.)
+pheatmap(HeatmapData_Binary) 
+```
+
+```{r}
+HeatmapData_Binary %>%
+  dist(, method = "binary") %>%
+  hclust() -> hc_effs
+cl_cb = function(hc_effs, mat){
+    dists <- dist(mat, method = "binary")
+    # Perform reordering according to OLO method
+    hclust_olo <- reorder(hc_effs, 1:230)
+    return(hclust_olo)
+}
+
+# HeatmapData_Binary %>%
+#     hclust() -> hc_fsp
+# cl_cb <- function(hc_fsp, mat){
+#     dists <- dist(mat, method = "binary")
+#     # Perform reordering according to OLO method
+#     hclust_olo <- reorder(hc_fsp, 1:27)
+#     return(hclust_olo)
+# }
+```
+
+
+```{r}
+#Add race annotations 
+Effectors %>% 
+  select(1:4)  %>% 
+  column_to_rownames("Isolate") -> row_annotations
+print(row_annotations)
+```
+
+```{r fig1, fig.height = 10, fig.width = 15}
+
+final_heatmap <- pheatmap(HeatmapData_Binary, 
+                          color = colorRampPalette(c("white", "firebrick"))(2), 
+                          legend = T,
+                          legend_breaks = c(0.75, 0.25),
+                          legend_labels = c("Present", "Absent"),
+                          drop_levels = F,
+                          clustering_distance_rows = "binary",
+                          #clustering_callback = cl_cb,
+                          cellwidth = 7, 
+                          cellheight = 45,
+                          border_color = "grey",
+                          annotation_row = row_annotations,
+                          annotation_colors = list(
+                            Forma_specialis = c(
+                              "apii" = "lightskyblue",
+                              "cepae" = "purple",
+                              "conglutinans" = "orange",
+                              "coriandrii" = "pink",
+                              "cubense" = "khaki1",
+                              "lactucae" = "green3",
+                              "lini" = "indianred",
+                              "lycopersici" = "red",
+                              "matthiolae" = "blue",
+                              "narcissi" = "yellow",
+                              "niveum" = "brown",
+                              "rapae" = "darkgreen",
+                              "from rocket" = "lightgreen",
+                              "vasinfectum" = "greenyellow",
+                              "non-pathogen" = "black" ),
+                            Race = c(
+                              "NA" = "white",
+                              "Race 1" = "gold4",
+                              "Race 2" = "yellow",
+                              "Race 3" = "lightblue",
+                              "Race 4" = "navy",
+                              "Tropical Race 4" = "green4"),
+                            Collection_Location = c(
+                              "Portugal" = "orange",
+                              "USA" = "red",
+                              "NA" = "white",
+                              "UK" = "blue",
+                              "Australia" = "yellow",
+                              "Japan" = "green",
+                              "tbc" = "white",
+                              "Russia" = "brown",
+                              "Spain" = "pink")
+                            ),
+                          fontsize_col = 10,
+                          fontsize = 24,
+                          treeheight_row = 300,
+                          treeheight_col = 80,
+                          angle_col = 90,
+                          cutree_rows = 17,
+                          na_col = "white",
+                          filename = "./FolaEffectorsHeatmap.pdf",
+                          height = 25,
+                          width = 48)
+```
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+

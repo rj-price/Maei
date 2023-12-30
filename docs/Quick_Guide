@@ -1,0 +1,8 @@
+Use the Maei_V3.sh script to generate a FASTA file of candidate effectors. 
+
+Use the BigBlast.sh script to BLAST this set of effectors back againts your genomes. 
+
+Use BuildTable.py to create a matrix containing the number of hits for your Maei candidate effectors 
+(within the BLAST thresholds) and genomes searched. 
+
+Use the HeatmapBuild.rmd to create a heatmap from you candidate effector matrix. 
