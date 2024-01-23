@@ -1,0 +1,173 @@
+---
+title: "Relationship between effector and mimp number and assembly size"
+author: "Jamie Pike"
+date: "25/10/2022"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T)
+```
+
+```{r, include=FALSE}
+#Set libraries
+#-------------
+
+#install.packages("ggplo2")
+#install.packages("tidyr")
+#install.packages("ggthemes")
+#install.packages("extrafont")
+library(extrafont)
+library(tidyverse)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
+library(forcats)
+```
+Dataset 
+---
+Data were generated from the Cubense_Vs_FOSC *Mimp*-associated effector identification (Maie) analysis performed in October 2022. Predicted effectors were recorded using the BigBlast dataset, whereby the candidate effector set generated using Maei was queried back against the *Fusairum* input assemblies using TBLASTN with a 1e^6^ cut-off. Hits with >70% identity and 90% coverage were recorded, and used in this dataset. *Mimps* were extracted from the Maei analysis sorted, final *mimp* bedfile. Assembly size was determined using the statistics recorded for the corresponding assembly on NCBI. 
+
+![*Mimp*-associated effector identification pipeline](/Volumes/Jamie_EXT/Fusarium_data/Maei_Analysis/Cubense_and_Species_Complex/Statistics/Maei_Figure.png)
+
+```{r}
+#Load and Prepare Data 
+#---------------------
+
+#Set working directory 
+setwd("/Volumes/Jamie_EXT/Fusarium_data/Maei_Analysis/Cubense_and_Species_Complex/Statistics")
+#Read the csv file in as a table
+StatsCSV <- read.table("MimpAndEffectorStats.csv", header = T, sep=",")
+
+StatsData <- select(StatsCSV, "Species", "Complex", "Strain","Assembly.Size..Mb.","Total.number.of.predicted.mimps","Total.number.of.predicted.effectors") %>%
+  #Rename the columns to reduce the long titles
+  rename(Isolate=Strain, 
+         Mimps=Total.number.of.predicted.mimps,
+         Effectors=Total.number.of.predicted.effectors,
+         Assembly_Size = Assembly.Size..Mb.)
+knitr::kable(StatsData)
+
+```
+***
+Perform correlation statistics
+---
+Correlation calculated using the R cor.test() function. The Pearson correlation is computed by default with the cor.test() function.
+Note that the correlation between variables X and Y is equal to the correlation between variables Y and X so the order of the variables in the cor.test() function does not matter.
+
+#### Predicted Effectors and *Mimps*
+
+```{r, fig.cap="Figure 1: Plot of the relationship between the total number of effectors identified through TBLASTN (1e-^6^ cut-off, 70% identity and 90% coverage threshold) and  the total number of *mimps*."}
+#Correlation between the total number of effectors and  the total number of mimps?
+#Visualize the relationship
+ggplot(StatsData) +
+  aes(x = Effectors, y = Mimps) +
+  geom_point(colour = "#0c4c8a") +
+  theme_minimal()
+#Correlation test:
+EffectorsVsMimps <- cor.test(StatsData$Effectors, StatsData$Mimps) 
+EffectorsVsMimps
+```
+
+#### Predicted Effectors and Assembly Size
+```{r, fig.cap="Figure 2: Plot of the relationship between the total number of effectors identified through TBLASTN (1e-^6^ cut-off, 70% identity and 90% coverage threshold) and  the total reported  size (Mb) of each assembly."}
+#Correlation between  the total number of effectors and Assembly Size?
+#Visualize the relationship
+ggplot(StatsData) +
+  aes(x = Effectors, y = Assembly_Size) +
+  geom_point(colour = "#0c4c8a") +
+  theme_minimal()
+#Correlation test:
+EffectorsVsAssemblySize <- cor.test(StatsData$Effectors, StatsData$Assembly_Size) 
+EffectorsVsAssemblySize
+```
+
+#### *Mimps* and Assembly Size
+```{r, fig.cap="Figure 3: Plot of the relationship between the total number of *mimps* identified using the *mimp* searching tools in the Maei pipeline and  the total reported  size (Mb) of each assembly."}
+#Correlation between the total number of mimps and Assembly Size?
+#Visualize the relationship
+ggplot(StatsData) +
+  aes(x = Mimps, y = Assembly_Size) +
+  geom_point(colour = "#0c4c8a") +
+  theme_minimal()
+#Correlation test:
+MimpsVsAssemblySize <- cor.test(StatsData$Mimps, StatsData$Assembly_Size)
+MimpsVsAssemblySize
+```
+
+***
+Relationship between predicted effectors, *Mimps* and Assembly size
+---
+```{r}
+
+#Prepare Data for plotting 
+#-------------------------
+
+#Extract the strain, assembly size, total number of mimps and effectors coloumns.ß
+StatsData <- select(StatsCSV,"Complex", "Strain","Assembly.Size..Mb.","Total.number.of.predicted.mimps","Total.number.of.predicted.effectors") %>%
+  rename(Isolate=Strain,                                     #Rename the columns to reduce the long titles
+         Mimps=Total.number.of.predicted.mimps,
+         Effectors=Total.number.of.predicted.effectors,
+         Assembly_Size = Assembly.Size..Mb.) %>%
+#Merge/group the mimps and effector columns so that both can be plotted per strain/isolate.
+  pivot_longer(cols = c(Mimps,Effectors), names_to="Legend", values_to="Mimps_and_Effectors") %>%  
+  mutate(Legend = factor(Legend, levels=c('Mimps','Effectors')))
+
+##Check the correct columns are extracted.
+# print(StatsData)
+
+```
+```{r, fig.cap="Figure 4:Relationship between predicted effectors, *Mimps* and Assembly size."}
+#Build plot
+#----------
+
+#Generate scale for Assembly size data 
+scaleRight <- 100 / max(StatsData$Mimps_and_Effectors)
+
+#Build Plot
+plot <- ggplot(aes(x=reorder(Isolate, Mimps_and_Effectors)),   #Create X axis, which contains all strains/isolates assessed ordered by the total number of mimps and effectors 
+               data = StatsData)+  
+  geom_bar(aes(y=Mimps_and_Effectors,                  #Plot the total number of mimps and effectors 
+               fill = Legend), 
+           position= 'dodge',                          #Ensure the bars are not stacked. 
+           stat='identity')+                           #Add the mimp or predicted effector content. 
+  scale_fill_manual("Legend", values=c("Effectors" = "#3399FF", "Mimps" = "#FF9900"))+
+  facet_grid(~Complex,
+             scales = "free_x",                        # Let the x axis vary across facets.
+             space = "free_x",                         # Let the width of facets vary and force all bars to have the same width.
+             switch = "x")+                            # Move the facet labels to the bottom.
+  geom_point(aes(y=Assembly_Size /scaleRight,         #Plot assemble size over the top of the bar chart.
+                 colour = "Assembly Size",             #Add assembly size to the legend. 
+                 group = 1))+ 
+  scale_colour_manual(" ", values=c("Assembly Size" = "black"))+
+  theme_bw()+
+  theme(legend.box="verticle",)+
+  xlab("\nIsolate")+                                   #Label the X axis 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())+
+  theme(axis.text.x = element_text(angle = 90,         #Adjust the text orientation on the x axis
+                                   vjust = 0.5, 
+                                   hjust=1,
+                                   size = 8))+
+  theme(axis.text = element_text(size = 8))+
+  theme(text = element_text(family = "Times New Roman"))+                        #Set font to Times New Roman
+  scale_y_continuous(name= "Total number of predicted\nmimps and effector hits", #Increase ticks on Y axis.
+                     breaks = scales::pretty_breaks(n = 10),                     #Create regular breaks in the Y axis. 
+                     sec.axis = sec_axis( trans=~.*scaleRight,                   #Insert second Y axis for the assembly size. Calculated using the right-hand scale.   
+                                          name="Size of Assembly (Mb)", 
+                                          breaks = scales::pretty_breaks(n = 15)
+                     ))
+#Prepare pdf of file 
+# pdf(file = "./RelationshipPlot.pdf",   # The directory you want to save the file in
+#     width = 15, # The width of the plot in inches
+#     height = 10)
+# plot
+# dev.off()
+
+plot
+
+
+```
+
