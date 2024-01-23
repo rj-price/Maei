@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>EffectorP Random Sample Test</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="effectorp-random-sample-test">EffectorP Random Sample Test</h1>
+<p>Following on from the meeting with David, Dan, and Murray (see Meetings: Project  Update - 25/09/2020) I tested a random sample of predicated proteins from the genomes listed below. The predicted proteins were randomly sampled using <a href="http://reformat.sh">reformat.sh</a> from bbmap and filtered to include a signal; peptide using SignalP. They were then combined into one FASTA. (See script below). EffectorP 2.0.1 was run on the combine FASTA and the Summary format and a predicted effector FASTA were generated.</p>
+<p>Predicted Proteomes used:</p>
+<p>GCA_000350365.1_Foc4_1.0_B2</p>
+<p>GWHAASU00000000_FocTR4_58</p>
+<p>GCA_007994515.1_UK0001</p>
+<p>GCA_000350345.1_Foc1_1.0_N2</p>
+<p>GCA_000260195.2_FO_II5_V1</p>
+<p>GWHAAST00000000_Foc1_60</p>
+<p>GCA_005930515.1_160527</p>
+<p>Script used: Can be found on Vettel /home/u1983390/Fusarium_data/EFFECTORP_RANDOM_SAMPLE_TEST/<a href="http://Extract_random_signal_pep_sequences.sh">Extract_random_signal_pep_sequences.sh</a></p>
+<pre><code>#!/bin/bash 
+
+#Created 29/09/2020 by Jamie Pike 
+
+#Extract a random sample, identify if it has a signal peptide and generate a FASTA containing those sequences. 
+
+#SignalP path
+
+Run_SignalP=/home/u1983390/apps/FoEC/signalp-4.1/signalp                         
+
+#Create for loop to loop though genomes with annotations/protein sequences 
+
+for i in $(cat File_list.txt); do 
+
+  #Extract random sample using bbmap's [reformat.sh](http://reformat.sh) (idea from [https://www.biostars.org/p/241972/](https://www.biostars.org/p/241972/)). 
+
+  [reformat.sh](http://reformat.sh) in=${i}.protein.faa out=stdout.fa samplereadstarget=200 ignorejunk | sed 's/ /_/g' &gt; ${i}_random_prot_sample.faa ;
+
+  #Identify sequences with a signal peptide, and generate a list of the FASTA headers for these sequences. 
+
+  $Run_SignalP -f summary ${i}_random_prot_sample.faa | grep &quot;^Name*&quot; | awk '$2 ~ /YES/ {print $0}' | awk  '{gsub(&quot;=&quot;,&quot;\t&quot;,$0); print;}' | awk '{print $2}' &gt; ${i}_samtools.list ;
+
+  #Extract these sequences using samtools faidx.
+
+  for j in $(cat ${i}_samtools.list); do samtools faidx ${i}_random_prot_sample.faa ${j} ; done &gt; ${i}_random_prot_sample_with_signal_peptide.faa; done 
+
+#Create a masta FASTA file with all of these sequences. 
+
+for i in $(cat File_list.txt); do cat ${i}_random_prot_sample_with_signal_peptide.faa; done &gt; all_random_prot_sample_with_signal_peptide.faa
+</code></pre>
+<p>EffectorP outputs (Vettel):</p>
+<p>/home/u1983390/Fusarium_data/EFFECTORP_RANDOM_SAMPLE_TEST/all_random_prot_sample_with_signal_peptide.EffectorP_summary</p>
+<p>/home/u1983390/Fusarium_data/EFFECTORP_RANDOM_SAMPLE_TEST/all_random_prot_sample_with_signal_peptide.EffectorP.fsa_aa</p>
+<p>Table of results comparing the different EffectorP runs:</p>
+<p>(Vettel) /home/u1983390/Fusarium_data/EFFECTORP_RANDOM_SAMPLE_TEST/Table_of_EffectorP_pred.txt</p>
+<p>Run          Date        Numbers  Percentage_pred</p>
+<p>Maei         13/08/2020  14/62    23%</p>
+<p>Maei         21/09/2020  15/64    23%</p>
+<p><a href="http://FoEC.py">FoEC.py</a>      04/08/2020  9/28     32%</p>
+<p>Rand_sample  30/09/2020  29/150   19%</p>
+<p>I also checked the paper with which EffectorP is associated (Link:<a href="https://bsppjournals.onlinelibrary.wiley.com/doi/full/10.1111/mpp.12682">https://bsppjournals.onlinelibrary.wiley.com/doi/full/10.1111/mpp.12682</a>). They don’t give a clear/strict/decisive false positive or sensitivity indication. They do present a table in which they have tried different collections of proteins against different classifiers (including EffectorP 2.0) which is copied below:</p>
+<p>**Table 3.**Independent validation of EffectorP's prediction accuracy.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td><strong>Predicted effectors</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Dataset</td>
+<td># of proteins</td>
+<td>EffectorP 2.0</td>
+<td>EffectorP 1.0</td>
+<td>EffectorP 1.0 and 2.0</td>
+<td>Small size classifier</td>
+<td>Small, cysteine‐rich classifier</td>
+</tr>
+<tr>
+<td>Fungal saprophyte secreted proteins</td>
+<td>24 432</td>
+<td>2865 (11.7%)</td>
+<td>4774 (19.5%)</td>
+<td>2444 (10%)</td>
+<td>10 529 (43.1%)</td>
+<td>4961 (20.3%)</td>
+</tr>
+<tr>
+<td>Fungal, plant and mammalian proteins with signal peptide and localization to endoplasmic reticulum, Golgi, membranes or with glycosylphosphatidylinositol (GPI) anchors</td>
+<td>2631</td>
+<td>220 (8.4%)</td>
+<td>294 (11.2%)</td>
+<td>164 (6.2%)</td>
+<td>654 (24.9%)</td>
+<td>307 (11.7%)</td>
+</tr>
+<tr>
+<td>Fungal proteins with unaffected pathogenicity phenotype</td>
+<td>938</td>
+<td>45 (4.8%)</td>
+<td>59 (6.3%)</td>
+<td>36 (3.8%)</td>
+<td>128 (13.6%)</td>
+<td>60 (6.4%)</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>28 001</strong></td>
+<td><strong>3130 (11.2%)</strong></td>
+<td><strong>5127 (18.3%)</strong></td>
+<td><strong>2644 (9.4%)</strong></td>
+<td><strong>11 311 (40.4%)</strong></td>
+<td><strong>5328 (19%)</strong></td>
+</tr>
+<tr>
+<td>Fungal effector positive training set</td>
+<td>94</td>
+<td>89 (94.7%)</td>
+<td>80 (85.1%)</td>
+<td>79 (84%)</td>
+<td>88 (93.6%)</td>
+<td>53 (56.4%)</td>
+</tr>
+<tr>
+<td>Fungal effector independent test set</td>
+<td>21</td>
+<td>16 (76.2%)</td>
+<td>16 (76.2%)</td>
+<td>16 (76.2%)</td>
+<td>19 (90.5%)</td>
+<td>10 (47.6%)</td>
+</tr>
+<tr>
+<td><strong>Accuracy</strong></td>
+<td></td>
+<td>88.8%</td>
+<td>81.7%</td>
+<td><strong>90.5%</strong></td>
+<td>59.8%</td>
+<td>80.9%</td>
+</tr>
+</tbody>
+</table>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>

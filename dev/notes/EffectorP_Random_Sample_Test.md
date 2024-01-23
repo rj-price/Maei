@@ -20,6 +20,7 @@ GCA_005930515.1_160527
 
 Script used: Can be found on Vettel /home/u1983390/Fusarium_data/EFFECTORP_RANDOM_SAMPLE_TEST/[Extract_random_signal_pep_sequences.sh](http://Extract_random_signal_pep_sequences.sh) 
 
+```
 #!/bin/bash 
 
 #Created 29/09/2020 by Jamie Pike 
@@ -49,6 +50,7 @@ for i in $(cat File_list.txt); do
 #Create a masta FASTA file with all of these sequences. 
 
 for i in $(cat File_list.txt); do cat ${i}_random_prot_sample_with_signal_peptide.faa; done > all_random_prot_sample_with_signal_peptide.faa
+```
 
 EffectorP outputs (Vettel):
 
@@ -72,9 +74,9 @@ Rand_sample  30/09/2020  29/150   19%
 
 I also checked the paper with which EffectorP is associated (Link:[https://bsppjournals.onlinelibrary.wiley.com/doi/full/10.1111/mpp.12682](https://bsppjournals.onlinelibrary.wiley.com/doi/full/10.1111/mpp.12682)). They don’t give a clear/strict/decisive false positive or sensitivity indication. They do present a table in which they have tried different collections of proteins against different classifiers (including EffectorP 2.0) which is copied below:
 
-**Table 3.�**�Independent validation of EffectorP's prediction accuracy.
+**Table 3.**Independent validation of EffectorP's prediction accuracy.
 
-|**Table 3.�**�Independent validation of EffectorP's prediction accuracy.                                                                                                |             |                       |                |                     |                     |                               |
+|                                                                                            |             |                       |                |                     |                     |                               |
 |------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|-----------------------|----------------|---------------------|---------------------|-------------------------------|
 |                                                                                                                                                                        |             |**Predicted effectors**|                |                     |                     |                               |
 |Dataset                                                                                                                                                                 |# of proteins|EffectorP 2.0          |EffectorP 1.0   |EffectorP 1.0 and 2.0|Small size classifier|Small, cysteine‐rich classifier|
