@@ -1,4 +1,4 @@
-# Set of_Fusarium_ assemblies included in candidate effector identification pipeline
+# Set of *Fusarium* assemblies included in candidate effector identification pipeline
 
 |Species        |fsp.         | Race | Isolate ID   |Host Species                                                                                          | Source                       | Accession        | Size (Mb) | Total Number of Contigs | Contig N50 (Mb) | GC (%) | complete BUSCOs (% ) |
 |------------------|-----------------|------|--------------|----------------------------------------------------------------------------------------------------------|------------------------------|------------------|-----------|-------------------------|-----------------|--------|----------------------|

@@ -1,0 +1,2462 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Mimp Searching Methods</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="mimp-searching-methods">Mimp Searching Methods</h1>
+<p><code>mimps</code> <code>mimp searching</code></p>
+<p>3 Methods:</p>
+<ul>
+<li>BLASTN</li>
+<li>REGEX</li>
+<li>HMM</li>
+</ul>
+<p>Two methods of mimp searching have been used in the literature, the most common is the use of a mimp TIR as a regex. The second is BLASTN searches for mimp homologs (mimps previously identified using regex). A HMM has not been used in the literature.</p>
+<hr>
+<h3 id="blastn">BLASTN</h3>
+<p>BLASTN – used by Chang et al., 2020 based on mimps from Van Dam et al., (2016) paper</p>
+<p><em>&quot;Mimps have been investigated in 3 Foc strains in previous studies, but unlike the II5 (Foc tropical race 4) strain that contains 11 mimps, only 2 mimps were found in strain B2 (Foc race 4) and 0 in strain N2 (Foc race1) (van Dam et al., 2016; van Dam and Rep, 2017). To extensively exploit the mimp sequences, we searched our local genome databases of Foc 1 and Foc 4 using 13 mimp sequences collected from Foc strains II5 and B2 as queries. As a result, a total of 41 mimps (20 in Foc 1 and 21 in Foc 4) with&gt;90 % similarity were obtained from Foc 1 and Foc 4 genomes&quot;</em></p>
+<p>Chang et al., (2020) reported using 13 mimp sequences from the 2016 Van Dam et al paper – however I could not find these sequences and emailed Dr Chang directly asking for them.</p>
+<p>Using a cutoff of 1e-6, and the mimp sequences Dr Chang supplied as query sequences, for BLASTN search a range of mimp homologs are identified:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Genome</strong></th>
+<th><strong>Isolate</strong></th>
+<th><strong>Race</strong></th>
+<th><strong>Number of BLASTN Hits</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GCA_000149955.2</td>
+<td>Fol 4287</td>
+<td>Fol</td>
+<td>185</td>
+</tr>
+<tr>
+<td>GCA_000260195.2</td>
+<td>FO_II5_V1</td>
+<td>TR4</td>
+<td>80</td>
+</tr>
+<tr>
+<td>GCA_000350345.1</td>
+<td>Foc1_1.0_N2</td>
+<td>R1</td>
+<td>98</td>
+</tr>
+<tr>
+<td>GCA_000350365.1</td>
+<td>Foc4_1.0_B2</td>
+<td>R4</td>
+<td>123</td>
+</tr>
+<tr>
+<td>GCA_001696625.1</td>
+<td>C1HIR_9889</td>
+<td></td>
+<td>104</td>
+</tr>
+<tr>
+<td>GCA_005930515.1</td>
+<td>160527</td>
+<td>R1</td>
+<td>148</td>
+</tr>
+<tr>
+<td>GCA_007994515.1</td>
+<td>UK0001</td>
+<td>TR4</td>
+<td>123</td>
+</tr>
+<tr>
+<td>GCA_011316005.1</td>
+<td>TC1-1</td>
+<td>R1</td>
+<td>103</td>
+</tr>
+<tr>
+<td>GWHAAST00000000</td>
+<td>Foc1_60</td>
+<td>R1</td>
+<td>35</td>
+</tr>
+<tr>
+<td>GWHAASU00000000</td>
+<td>FocTR4_58</td>
+<td>TR4</td>
+<td>129</td>
+</tr>
+</tbody>
+</table>
+<p>Notes on the search can be found: /Users/u1983390/Fusarium_data/MIMPS/MIMP_BLAST_SEARCHES/Notes_On_Mimp_BLASTN_Searches.txt</p>
+<p>BLASTN hits were then filtered based on size (hits between 200 and 400 null):</p>
+<table>
+<thead>
+<tr>
+<th><strong>Genome</strong></th>
+<th><strong>Isolate</strong></th>
+<th><strong>Race</strong></th>
+<th><strong>Number of BLASTN Hits</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GCA_000149955.2</td>
+<td>Fol 4287</td>
+<td>Fol</td>
+<td>57</td>
+</tr>
+<tr>
+<td>GCA_000260195.2</td>
+<td>FO_II5_V1</td>
+<td>TR4</td>
+<td>33</td>
+</tr>
+<tr>
+<td>GCA_000350345.1</td>
+<td>Foc1_1.0_N2</td>
+<td>R1</td>
+<td>40</td>
+</tr>
+<tr>
+<td>GCA_000350365.1</td>
+<td>Foc4_1.0_B2</td>
+<td>R4</td>
+<td>42</td>
+</tr>
+<tr>
+<td>GCA_001696625.1</td>
+<td>C1HIR_9889</td>
+<td></td>
+<td>43</td>
+</tr>
+<tr>
+<td>GCA_005930515.1</td>
+<td>160527</td>
+<td>R1</td>
+<td>55</td>
+</tr>
+<tr>
+<td>GCA_007994515.1</td>
+<td>UK0001</td>
+<td>TR4</td>
+<td>47</td>
+</tr>
+<tr>
+<td>GCA_011316005.1</td>
+<td>TC1-1</td>
+<td></td>
+<td>37</td>
+</tr>
+<tr>
+<td>GWHAAST00000000</td>
+<td>Foc1_60</td>
+<td>R1</td>
+<td>16</td>
+</tr>
+<tr>
+<td>GWHAASU00000000</td>
+<td>FocTR4_58</td>
+<td>TR4</td>
+<td>45</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+<hr>
+<h3 id="regex">REGEX</h3>
+<p>Alternatively, mimps can be searched using the TIR sequence. The TIR sequences (know as the regex (regular expression) is searched using custom scripts.</p>
+<p>Almost all mimp identification is done using REGEX searches in the literature.</p>
+<p>There are two mimpfinder scripts available on Github:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Script</strong></th>
+<th><strong>Author</strong></th>
+<th><strong>Link</strong></th>
+<th><strong>Language</strong></th>
+<th><strong>Paper</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01a.mimpfinder_combine_to_putefflist_MetStop.py</td>
+<td>Van Dam</td>
+<td><a href="https://github.com/pvdam3/FoEC">https://github.com/pvdam3/FoEC</a></td>
+<td>Python</td>
+<td>van Dam, P., Fokkens, L., Schmidt, S. M., Linmans, J. H. J., Kistler, H. C., Ma, L.-J., &amp; Rep, M. (2016). Effector profiles distinguish _formae speciales�_�of <em>Fusarium oxysporum</em>. Environmental Microbiology. <a href="http://doi.org/10.1111/1462-2920.13445">http://doi.org/10.1111/1462-2920.13445</a></td>
+</tr>
+<tr>
+<td>mimp_finder.pl</td>
+<td>Armitage</td>
+<td><a href="https://github.com/adarmitage/pathogen/blob/master/mimp_finder/mimp_finder.pl">https://github.com/adarmitage/pathogen/blob/master/mimp_finder/mimp_finder.pl</a></td>
+<td>Perl</td>
+<td><a href="https://www.nature.com/articles/s41598-018-30335-7">https://www.nature.com/articles/s41598-018-30335-7</a></td>
+</tr>
+<tr>
+<td>No Obvious paper however, I expect this one:</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Mimpfinder – developed by Van Dam et al (2016)</p>
+<p>Van Dam and Rep, 2017 = <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5579170">https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5579170</a>/</p>
+<p>Paper where the TIR in Dr Chang emailed file is from: <a href="https://www.ars.usda.gov/ARSUserFiles/3041/2016-%20van%20Dam_Environmental_Microbiology.pdf">https://www.ars.usda.gov/ARSUserFiles/3041/2016-%20van%20Dam_Environmental_Microbiology.pdf</a>  <em>I also believe that this is the TIR used in the mimp_finder as part of <a href="http://FoEC.py">FoEC.py</a></em></p>
+<p>Schmidt et al., 2013: <a href="https://link.springer.com/article/10.1186/1471-2164-14-119">https://link.springer.com/article/10.1186/1471-2164-14-119</a></p>
+<p>Mimp Sequences from literature: NOT AN EXHAUSTIVE SEARCH.</p>
+<p>NOTE: These TIRs are the same.</p>
+<p><img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/Screenshot_2020-11-17_at_12-40-22.png" alt="Screenshot_2020-11-17_at_12-40-22.png"></p>
+<p>Image: Bergemann <em>et al.,</em> (2008) - <a href="https://link.springer.com/article/10.1007%2Fs00239-008-9164-7#SecESM1">https://link.springer.com/article/10.1007%2Fs00239-008-9164-7#SecESM1</a></p>
+<p>Regex Searches for mimps: Find files etc: VETTEL /home/u1983390/Fusarium_data/MIMPS/TIR_SEQUENCES</p>
+<table>
+<thead>
+<tr>
+<th><strong>Genome</strong></th>
+<th><strong>Isolate</strong></th>
+<th><strong>Race</strong></th>
+<th><strong>Number of hits and TIR</strong></th>
+<th><strong>Number of hits and TIR</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td>Van Dam and Rep (2017) AGT[GA][GA]G[GAT][TGC]GCAA[TAG]AA</td>
+<td>Armitage et al (2018)  CAGTGGGNNGCAA[TA]AA</td>
+</tr>
+<tr>
+<td>GCA_000149955.2</td>
+<td>Fol 4287</td>
+<td>Fol</td>
+<td>58</td>
+<td>52</td>
+</tr>
+<tr>
+<td>GCA_000260195.2</td>
+<td>FO_II5_V1</td>
+<td>TR4</td>
+<td>19</td>
+<td>13</td>
+</tr>
+<tr>
+<td>GCA_000350345.1</td>
+<td>Foc1_1.0_N2</td>
+<td>R1</td>
+<td>27</td>
+<td>23</td>
+</tr>
+<tr>
+<td>GCA_000350365.1</td>
+<td>Foc4_1.0_B2</td>
+<td>R4</td>
+<td>28</td>
+<td>20</td>
+</tr>
+<tr>
+<td>GCA_001696625.1</td>
+<td>C1HIR_9889</td>
+<td>R4</td>
+<td>28</td>
+<td>21</td>
+</tr>
+<tr>
+<td>GCA_005930515.1</td>
+<td>160527</td>
+<td>R1</td>
+<td>41</td>
+<td>34</td>
+</tr>
+<tr>
+<td>GCA_007994515.1</td>
+<td>UK0001</td>
+<td>TR4</td>
+<td>38</td>
+<td>27</td>
+</tr>
+<tr>
+<td>GCA_011316005.1</td>
+<td>TC1-1</td>
+<td>R1</td>
+<td>31</td>
+<td>23</td>
+</tr>
+<tr>
+<td>GWHAAST00000000</td>
+<td>Foc1_60</td>
+<td>R1</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>GWHAASU00000000</td>
+<td>FocTR4_58</td>
+<td>TR4</td>
+<td>38</td>
+<td>29</td>
+</tr>
+</tbody>
+</table>
+<p>ALIGNMENTS? What do these sequences look like? Can they be clustered within the mimp families from BERGEMANN? Do they need to be?  - NEED TO USE THE SECTION OF CODE TO MAKE A FASTA FROM THE MAEI SCRIPT TO THEN USE IN JALVIEW FOR PHYLOGENTIC TREE GENERATTION.</p>
+<hr>
+<h3 id="hidden-markov-model">HIDDEN MARKOV MODEL</h3>
+<p>Suggested by Dr David Studholme - not yet used in the literature for mimp searching.</p>
+<p>Various HMMs were built.</p>
+<p>Initially an HMM was built by  searching through the genomes listed in the tables above using the original mimp_finder.py script I wrote (regex: CAGTGGGNNGCAA[TA]AA). These hits were extracted and used to make an HMM:</p>
+<p>Building an HMM for mimp searching 12/10/2020</p>
+<p>The genome assemblies were copied to this directory (/home/u1983390/Fusarium_data/MIMPS/MIMP_hmm) from /home/u1983390/Fusarium_data/Raw_Genomes/ASSEMBLIES/GENOMIC as was the .txt file containing a list of these genomes.</p>
+<p>Spaces and tab were removed in headers using sed.</p>
+<p>The script find_and_extract_mimps.sh was copied from the first part of ~/Scripts/Maei.sh and run on the .txt file listing the genomes.</p>
+<p>The mimp FASTAs were combined into one FASTA: All_mimps_comb.fna</p>
+<p>The combined FASTA was then aligned using MAFFT: All_mimps_comb.aln.fa</p>
+<p>The aligned sequence was then viewed in Jalview, and ends trimmed so that the sequences started at the mimp TIRs. There were not many highly conserved regions, apart from the REGEX. I think there needs to be more work done on what the transposes RF may look like in a mimp.</p>
+<p>A new timmed file was created in Jalview saving in Stockholm Format: All_mimps_comb_trimmed.aln.sto</p>
+<p>This was then used to build a hmm with HMMER's hmmbuild: hmmbuild --dna All_mimps_comb_trimmed.hmm All_mimps_comb_trimmed.aln.sto</p>
+<p>The output of this was the file: All_mimps_comb_trimmed.hmm</p>
+<p>The contig on which most mimps are found in the Assembly for UK00001 was extracted from home/u1983390/Fusarium_data/MIMPS/MIMP_hmm/GENOMES/GCA_007994515.1_UK0001_genomic.fna using samtools faidx and saved as UK0001_scf_14_hmm_test.fasta.</p>
+<p>nhmmer was then used to search for mimps using the new hmm file on the extracted scaffold from UK0001. A .bed file was made form the output.</p>
+<pre><code>nhmmer --tblout &quot;hmm_test.tbl&quot; --dna  All_mimps_comb_trimmed.hmm UK0001_scf_14_hmm_test.fasta ;  awk 'BEGIN { OFS=&quot;\t&quot; }  {print $1,$7,$8,$12}' &quot;hmm_test.tbl&quot; &gt; hmm_test.bed
+</code></pre>
+<p>The output file from the MAFFT alignment was quite messy:
+<img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/All_mimps_comb_trimned-aln.png" alt="All_mimps_comb_trimned-aln.png"></p>
+<p>Only the TIRs aligned well which is obvious because they're all that was searched for.
+<img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/All_mimps_comb_trimmed-aln_top_left_consensus_sequence.png" alt="All_mimps_comb_trimmed-aln_top_left_consensus_sequence.png"></p>
+<p>I continued with the HMM build and search:</p>
+<p>The HMM built using the mimp hits from my mimp_finditer.py script found 81 mimps on scaffold 14 of the UK0001 assembly. My mimp finder found 18. None of the mimps found by the HMM share an exact location with the mimps found by mime  (see excel doc).
+<a href="./file/All_HMM_Search_methods_compared.xlsx">All_HMM_Search_methods_compared.xlsx</a></p>
+<p>NCBI MIMPS</p>
+<p>Publicly available mimps were considered for the construction of an HMM.</p>
+<p>Mimp sequences reported in the following papers were downloaded from NCBI.</p>
+<pre><code>- Bergemann, M., Lespinet, O., M’Barek, S.B., Daboussi, M.J. and Dufresne, M., 2008. Genome-Wide Analysis of the Fusarium oxysporummimp Family of MITEs and Mobilization of Both Native and De Novo Created mimps. Journal of molecular evolution, 67(6), pp.631-642.
+- Hua-Van, A., Davière, J.M., Kaper, F., Langin, T. and Daboussi, M.J., 2000. Genome organization in Fusarium oxysporum: clusters of class II transposons. Current genetics, 37(5), pp.339-347.
+</code></pre>
+<p>They were combined into one FASTA and aligned using the deafult setting in MAFFT&quot;</p>
+<pre><code> mafft Mimp_Sequences_NCBI.fasta &gt; Mimp_Sequences_NCBI.aln.fasta
+</code></pre>
+<p>The aligned file was then manually checked  in Jalview (image below), but again, didn't align very well.
+<img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/Mimp_Sequence_NCBI-aln-jalview.png" alt="Mimp_Sequence_NCBI-aln-jalview.png"></p>
+<p>The alignment was saved in Stockholm format from Jalview and then an HMM was built.</p>
+<pre><code>hmmbuild --dna Mimp_Sequences_NCBI.hmm Mimp_Sequences_NCBI.aln.sto
+</code></pre>
+<p></p>
+<p>The HMM was used to search Scaffold 14 of the UK0001 assembly</p>
+<pre><code>nhmmer --tblout &quot;Mimp_Sequences_NCBI.hmm.tblout&quot; --dna Mimp_Sequences_NCBI.hmm UK0001_scf_14_hmm_test.fast
+</code></pre>
+<p>A bed file was generated from the output using awk</p>
+<pre><code>awk -v OFS='\t'  '{print $1,$7,$8,$12}' Mimp_Sequences_NCBI.hmm.tblout &gt; Mimp_Sequences_NCBI.hmm.tblout.bed
+</code></pre>
+<p>MY MIMPS AND NCBI MIMPS COMBINED</p>
+<p>I decided to combine the mimps I had found with my mimp finder and the sequences from NCBI, and cluster them.</p>
+<p>Using NCBI Mimps and my MIMPs to build an HMM    2/11/2020</p>
+<p>The mimp sequences downloaded from NCBI and found in: /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/NCBI_MIMPS/Mimp_Sequences_NCBI.fasta were copied to /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/NCBI_AND_MY_MIMPS_COMB</p>
+<p>The mimps found from my regex search found in: /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/MY_MIMPS/All_mimps_comb.fna were copied to /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/NCBI_AND_MY_MIMPS_COMB as All_mimps_comb_from_my_mimp_finder_search.fna</p>
+<p>The mimps from my regex search and those downloaded from NCBI were then merged into one FASTA file: Both_NCBI_and_my_mimps.fasta ensuring that the mimps from NCBI were the first entires in the FASTA.</p>
+<p>This combined FASTA was then clustered using CD-HIT:</p>
+<pre><code>	cd-hit -i ./Both_NCBI_and_my_mimps.fasta -d 0 -o ./Both_NCBI_and_my_mimps.CLUSTERED_90_perc_ident.fasta -c 0.9 -n 5  -G 1 -g 1 -b 20 -l 10 -s 0.0 -aL 0.0 -aS 0.0
+</code></pre>
+<p>THEN USED FOLLOWING COMMANDS :</p>
+<pre><code>awk -F&quot;[&gt; ]&quot; '
+BEGIN{
+  OFS=&quot;_&quot;
+}
+/^&gt;/{
+  close(out_file)
+  out_file=$2 OFS $3
+  next
+}
+{
+  match($0,/&gt;[^&quot;]*/)
+  print substr($0,RSTART+1) &gt; (out_file)
+}' ./Both_NCBI_and_my_mimps.CLUSTERED_90_perc_ident.fasta.clstr
+
+#Make a directory which contains these individual cluster list file.
+
+mkdir CLUSTERS_90_PERC_IDENT_2_11_2020
+mv Cluster_* ./CLUSTERS_90_PERC_IDENT_2_11_2020/
+
+#List all of the clusters.
+
+ls ./CLUSTERS_90_PERC_IDENT_2_11_2020/ &gt; Cluster_list_90_perc_ident.txt
+
+for i in $(cat ./Cluster_list_90_perc_ident.txt); do awk -F'\\.\\.\\.' '{print $1}' ./CLUSTERS_90_PERC_IDENT_2_11_2020/${i} &gt; ./CLUSTERS_90_PERC_IDENT_2_11_2020/${i}.final ; done
+
+#Loop through the indiviual cluster files and generate a FASTA containing all of the sequences in that cluster.
+
+for i in $(cat Cluster_list_90_perc_ident.txt);
+  do for j in $(cat ./CLUSTERS_90_PERC_IDENT_2_11_2020/${i}.final);
+    do samtools faidx ./Both_NCBI_and_my_mimps.fasta &quot;${j}&quot; ; done  &gt; ./CLUSTERS_90_PERC_IDENT_2_11_2020/${i}.fasta ; done
+
+</code></pre>
+<p>These individual FASTA files were then aligned using MAFFT (default settings):</p>
+<pre><code>for i in $(cat ../Cluster_list_90_perc_ident.txt); do mafft ./${i}.fasta &gt; ${i}.aln.fasta ; done
+</code></pre>
+<p>The cluster list file was then moved to the 90% identity cluster directory</p>
+<pre><code>mv Cluster_list_90_perc_ident.txt ./CLUSTERS_90_PERC_IDENT_2_11_2020/Cluster_list_90_perc_ident.txt
+</code></pre>
+<p>The aligned cluster fastas were then grouped into one large FASTA: All.aln.fasta</p>
+<p>All.aln.fasta was then aligned using MAFFT; Realn_All.aln.fasta</p>
+<p>This FASTA was then viewed in Jalview and ends trimmed and saved as a FASTA and a .sto e.g.: realn_realn_All.aln.trimmed.hmm.tblout&quot;All.aln.trimmed.fasta
+<img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/realn_All-aln-trimmed.png" alt="realn_All-aln-trimmed.png"></p>
+<p>The stockholm file was then used to build an hmm:</p>
+<pre><code>hmmbuild --dna realn_All.aln.trimmed.hmm realn_All.aln.trimmed.sto
+</code></pre>
+<p>The UK0001_scf_14 files were copied to the working directory /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/NCBI_AND_MY_MIMPS_COMB from /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/MY_MIMPS/</p>
+<p>The HMM was then used to search the UK0001_scf_14 fasta file:</p>
+<pre><code>nhmmer --tblout &quot;realn_All.aln.trimmed.hmm.tblout&quot; --dna realn_All.aln.trimmed.hmm UK0001_scf_14_hmm_test.fasta
+</code></pre>
+<p>A bed file was also made using this search and awk:</p>
+<pre><code>nhmmer --tblout &quot;realn_All.aln.trimmed.hmm.tblout&quot; --dna realn_All.aln.trimmed.hmm UK0001_scf_14_hmm_test.fasta ;  awk 'BEGIN { OFS=&quot;\t&quot; }  {print $1,$7,$8,$12}' &quot;realn_All.aln.trimmed.hmm.tblout&quot; &gt; realn_All.aln.trimmed.hmm.tblout.bed
+</code></pre>
+<p>NHMMER was then used to search the entire genome of UK0001: GCA_007994515.1_UK0001_genomic.fna</p>
+<pre><code>nhmmer --tblout &quot;realn_All.aln.trimmed.hmm_vs_whole_UK0001_genome.tblout&quot; --dna realn_All.aln.trimmed.hmm GCA_007994515.1_UK0001_genomic.fna ; awk 'BEGIN { OFS=&quot;\t&quot; }  {print $1,$7,$8,$12}' &quot;realn_All.aln.trimmed.hmm_vs_whole_UK0001_genome.tblout&quot; &gt; realn_All.aln.trimmed.hmm_vs_whole_UK0001_genome.tblout.bed
+</code></pre>
+<p>This was then used to search all genomes.</p>
+<pre><code>for i in $(cat ./GENOMES/Fasta_list.txt); do 
+nhmmer --tblout &quot;realn_All.aln.trimmed.hmm_vs_${i}.tblout&quot; --dna realn_All.aln.trimmed.hmm ./GENOMES/${i} ; awk 'BEGIN { OFS=&quot;\t&quot; }  {print $1,$7,$8,$12}' &quot;realn_All.aln.trimmed.hmm_vs_${i}.tblout&quot; &gt; ./WHOLE_GENOME_SEARCHES/realn_All.aln.trimmed.hmm_vs_${i}.tblout.bed ; done 
+</code></pre>
+<p>Fasta files were generated for mimps sequences found in all genomes (using <a href="https://github.com/JamiePike/UsefulScripts/blob/master">https://github.com/JamiePike/UsefulScripts/blob/master</a>/bed2fasta.sh)</p>
+<p>These output fastas were then concatenated into a larger fasta file and a large bed file:</p>
+<pre><code>cat *.fasta &gt; WHOLE_GENOME_SEARCHES_All_mimp_hits.fasta 
+cat *.bed &gt; WHOLE_GENOME_SEARCHES_All_mimp_hits.bed
+</code></pre>
+<p>This larger fasta file was then to generate a non-redundant set of sequences:</p>
+<pre><code>cd-hit -i ./WHOLE_GENOME_SEARCHES_All_mimp_hits.fasta -d 0 -o ./WHOLE_GENOME_SEARCHES_All_mimp_hits.non-redundant.fasta -c 1 -n 5  -G 1 -g 1 -b 20 -l 10 -s 0.0 -aL 1 -aS 0.0
+</code></pre>
+<p>This set was then BLASTED using NCBI BLAST: <a href="https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&amp;PAGE_TYPE=BlastSearch&amp;LINK_LOC=blasthome">https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&amp;PAGE_TYPE=BlastSearch&amp;LINK_LOC=blasthome</a></p>
+<p>I also compared the locations of a six gene blast search to the locations of the mimps found by the NCBI and MY MIMPs HMM search and the locations of my mimp searches:</p>
+<p><img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/image.png" alt="image.png"></p>
+<p><em>HMM used to search for MITES in this paper (<a href="https://academic.oup.com/gbe/article/doi/10.1093/gbe/evr098/595611">https://academic.oup.com/gbe/article/doi/10.1093/gbe/evr098/595611</a>) however, genomes were mined for mites first, and then an HMM built using each MITE class. They were not looking for a specific MITE in their searches, so far as I can tell, just MITES in general (See: Identification of MITEs in the E. festucae Genome Sequence).</em></p>
+<p>As 90% identity generated quite a messy intervening profile for the HMM. The sequences were grouped and then aligned at 90%, 80%, and 70% identity and each cluster was then turned into an HMM.</p>
+<p>90% Identity:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Cluster</strong></th>
+<th><strong>Number of seq</strong></th>
+<th><strong>Trimmer?</strong></th>
+<th><strong>PNG</strong></th>
+<th><strong>Stockholm</strong></th>
+<th><strong>Keep?</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>5</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td>3</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>2</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>3</td>
+<td>21</td>
+<td>yes</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>19</td>
+<td>yes</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>5</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td>2</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>7</td>
+<td>2</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>8</td>
+<td>8</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>9</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>4</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>6</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>12</td>
+<td>11</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>13</td>
+<td>11</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>14</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>15</td>
+<td>6</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>16</td>
+<td>4</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>17</td>
+<td>2</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>18</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>19</td>
+<td>5</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>20</td>
+<td>3</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>21</td>
+<td>2</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>22</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>23</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>24</td>
+<td>3</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>25</td>
+<td>3</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>26</td>
+<td>15</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>27</td>
+<td>7</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>28</td>
+<td>3</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>29</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>30</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>31</td>
+<td>14</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>32</td>
+<td>10</td>
+<td>yes</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>33</td>
+<td>4</td>
+<td>yes</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>34</td>
+<td>2</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>35</td>
+<td>5</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td></td>
+</tr>
+<tr>
+<td>36</td>
+<td>1</td>
+<td>no</td>
+<td>y</td>
+<td>y</td>
+<td>?</td>
+</tr>
+</tbody>
+</table>
+<pre><code>
+for i in $(cat Cluster_list_90_perc_ident.txt); do hmmbuild --dna ${i}.hmm  ${i}_aln.sto ; done
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_0_aln.sto
+# output HMM file:                  Cluster_0.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_0_aln            5   379   227   359     1.70  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.04
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_1_aln.sto
+# output HMM file:                  Cluster_1.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_1_aln            3   367   367   525     1.70  0.620 
+
+# CPU time: 0.05u 0.00s 00:00:00.05 Elapsed: 00:00:00.05
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_10_aln.sto
+# output HMM file:                  Cluster_10.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_10_aln           4   243   243   378     1.78  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_11_aln.sto
+# output HMM file:                  Cluster_11.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_11_aln           6   227   227   359     1.73  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_12_aln.sto
+# output HMM file:                  Cluster_12.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_12_aln          11   225   224   354     1.81  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_13_aln.sto
+# output HMM file:                  Cluster_13.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_13_aln          11   225   222   351     1.87  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_14_aln.sto
+# output HMM file:                  Cluster_14.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_14_aln           1   223   223   364     1.00  0.343 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_15_aln.sto
+# output HMM file:                  Cluster_15.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_15_aln           6   223   223   354     1.74  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_16_aln.sto
+# output HMM file:                  Cluster_16.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_16_aln           4   223   222   353     1.75  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_17_aln.sto
+# output HMM file:                  Cluster_17.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_17_aln           2   222   222   353     1.70  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_18_aln.sto
+# output HMM file:                  Cluster_18.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_18_aln           1   222   222   362     1.00  0.342 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_19_aln.sto
+# output HMM file:                  Cluster_19.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_19_aln           5   217   217   347     1.68  0.618 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_2_aln.sto
+# output HMM file:                  Cluster_2.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_2_aln            1   367   367   538     1.00  0.333 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_20_aln.sto
+# output HMM file:                  Cluster_20.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_20_aln           3   217   217   347     1.68  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_21_aln.sto
+# output HMM file:                  Cluster_21.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_21_aln           2   217   217   347     1.69  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_22_aln.sto
+# output HMM file:                  Cluster_22.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_22_aln           1   216   216   355     1.00  0.348 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.01
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_23_aln.sto
+# output HMM file:                  Cluster_23.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_23_aln           1   215   215   354     1.00  0.338 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_24_aln.sto
+# output HMM file:                  Cluster_24.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_24_aln           3   215   215   345     1.67  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_25_aln.sto
+# output HMM file:                  Cluster_25.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_25_aln           3   215   215   345     1.68  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_26_aln.sto
+# output HMM file:                  Cluster_26.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_26_aln          15   211   207   334     1.78  0.619 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_27_aln.sto
+# output HMM file:                  Cluster_27.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_27_aln           7   211   209   337     1.73  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_28_aln.sto
+# output HMM file:                  Cluster_28.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_28_aln           3   208   208   336     1.68  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_29_aln.sto
+# output HMM file:                  Cluster_29.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_29_aln           1   208   208   345     1.00  0.339 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.01
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_3_aln.sto
+# output HMM file:                  Cluster_3.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_3_aln           21   215   215   344     1.78  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_30_aln.sto
+# output HMM file:                  Cluster_30.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_30_aln           1   208   208   345     1.00  0.338 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_31_aln.sto
+# output HMM file:                  Cluster_31.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_31_aln          14   209   203   331     1.78  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_32_aln.sto
+# output HMM file:                  Cluster_32.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_32_aln          10   208   207   334     1.80  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_33_aln.sto
+# output HMM file:                  Cluster_33.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_33_aln           4   167   167   286     1.68  0.619 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_34_aln.sto
+# output HMM file:                  Cluster_34.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_34_aln           2   167   167   286     1.68  0.619 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_35_aln.sto
+# output HMM file:                  Cluster_35.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_35_aln           5   185   185   308     1.68  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_36_aln.sto
+# output HMM file:                  Cluster_36.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_36_aln           1   185   185   316     1.00  0.340 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.01
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_4_aln.sto
+# output HMM file:                  Cluster_4.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_4_aln           19   215   215   344     1.74  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_5_aln.sto
+# output HMM file:                  Cluster_5.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_5_aln            5   313   313   462     1.66  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.04
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_6_aln.sto
+# output HMM file:                  Cluster_6.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_6_aln            2   300   300   447     1.68  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_7_aln.sto
+# output HMM file:                  Cluster_7.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_7_aln            2   245   245   381     1.67  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.04
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_8_aln.sto
+# output HMM file:                  Cluster_8.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_8_aln            3   245   245   381     1.68  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_9_aln.sto
+# output HMM file:                  Cluster_9.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_9_aln            9   243   243   378     1.86  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+</code></pre>
+<p>80% identity:</p>
+<p><img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/80_Perct_sim_align-jalview.png" alt="80_Perct_sim_align-jalview.png"></p>
+<p>Each cluster within 80% identity was saved as a PNG and STO using Jalview.</p>
+<table>
+<thead>
+<tr>
+<th>Table x: The number of sequences per cluster, whether the alignment was trimmed to generate the stockholm file, and the file types that were made from the trimmed (if trimmed) alignment.</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cluster</strong></td>
+<td><strong>Number of seq</strong></td>
+<td><strong>Trimmer?</strong></td>
+<td><strong>PNG</strong></td>
+<td><strong>Stockholm</strong></td>
+<td><strong>Keep?</strong></td>
+</tr>
+<tr>
+<td>0</td>
+<td>5</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td>4</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>24</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>22</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>5</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>2</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>6</td>
+<td>2</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>7</td>
+<td>3</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>8</td>
+<td>31</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>38</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>6</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>11</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>12</td>
+<td>12</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>13</td>
+<td>6</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>14</td>
+<td>4</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>15</td>
+<td>2</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>16</td>
+<td>1</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>17</td>
+<td>5</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>18</td>
+<td>3</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>19</td>
+<td>1</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>20</td>
+<td>4</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>21</td>
+<td>2</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>22</td>
+<td>3</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>23</td>
+<td>1</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+</tbody>
+</table>
+<p>Profile HMMs were then built using the stockholm files:</p>
+<pre><code>for i in $(cat Cluster_list_80_perc_ident.txt); do hmmbuild --dna ${i}.hmm  ${i}_aln.sto ; done
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_0_aln.sto
+# output HMM file:                  Cluster_0.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_0_aln            5   227   227   359     1.70  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.04
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_1_aln.sto
+# output HMM file:                  Cluster_1.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_1_aln            4   367   367   524     1.82  0.619 
+
+# CPU time: 0.05u 0.00s 00:00:00.05 Elapsed: 00:00:00.05
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_10_aln.sto
+# output HMM file:                  Cluster_10.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_10_aln           6   227   227   359     1.73  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_11_aln.sto
+# output HMM file:                  Cluster_11.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_11_aln          11   225   224   354     1.81  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_12_aln.sto
+# output HMM file:                  Cluster_12.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_12_aln          12   225   224   352     1.93  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_13_aln.sto
+# output HMM file:                  Cluster_13.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_13_aln           6   223   223   354     1.74  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_14_aln.sto
+# output HMM file:                  Cluster_14.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_14_aln           4   223   222   353     1.75  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_15_aln.sto
+# output HMM file:                  Cluster_15.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_15_aln           2   222   222   353     1.70  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_16_aln.sto
+# output HMM file:                  Cluster_16.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_16_aln           1   222   222   362     1.00  0.342 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.01
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_17_aln.sto
+# output HMM file:                  Cluster_17.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_17_aln           5   217   217   347     1.68  0.618 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_18_aln.sto
+# output HMM file:                  Cluster_18.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_18_aln           3   217   217   347     1.68  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_19_aln.sto
+# output HMM file:                  Cluster_19.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_19_aln           1   216   216   355     1.00  0.348 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.01
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_2_aln.sto
+# output HMM file:                  Cluster_2.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_2_aln           24   215   215   343     1.84  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_20_aln.sto
+# output HMM file:                  Cluster_20.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_20_aln           4   167   167   286     1.68  0.619 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_21_aln.sto
+# output HMM file:                  Cluster_21.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_21_aln           2   203   203   329     1.86  0.619 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_22_aln.sto
+# output HMM file:                  Cluster_22.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_22_aln           5   185   185   308     1.68  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_23_aln.sto
+# output HMM file:                  Cluster_23.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_23_aln           1   185   185   316     1.00  0.340 
+
+# CPU time: 0.01u 0.00s 00:00:00.01 Elapsed: 00:00:00.01
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_3_aln.sto
+# output HMM file:                  Cluster_3.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_3_aln           22   215   215   343     1.84  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_4_aln.sto
+# output HMM file:                  Cluster_4.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_4_aln            5   313   313   462     1.66  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_5_aln.sto
+# output HMM file:                  Cluster_5.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_5_aln            2   300   300   447     1.68  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_6_aln.sto
+# output HMM file:                  Cluster_6.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_6_aln            2   245   245   381     1.67  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_7_aln.sto
+# output HMM file:                  Cluster_7.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_7_aln            3   245   245   381     1.68  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_8_aln.sto
+# output HMM file:                  Cluster_8.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_8_aln           31   222   207   332     2.25  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_9_aln.sto
+# output HMM file:                  Cluster_9.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_9_aln           38   227   207   331     2.15  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+</code></pre>
+<p>HMM search using the clusters from 80% identity and the UK0001 genome</p>
+<pre><code>for i in $(cat Cluster_list_80_perc_ident.txt); do nhmmer --tblout &quot;${i}.hmm_vs_whole_UK0001_genome.tblout&quot; --dna ${i}.hmm GCA_007994515.1_UK0001_genomic.fna ;  awk 'BEGIN { OFS=&quot;\t&quot; }  {print $1,$7,$8,$12}' &quot;${i}.hmm_vs_whole_UK0001_genome.tblout&quot; &gt; ${i}.hmm_vs_whole_UK0001_genome.tblout.bed ; done
+</code></pre>
+<p>Each bed file was then parsed into a larger HMM MIMP search bed file for the UK001 genome.</p>
+<pre><code>sort -u *.hmm_vs_whole_UK0001_genome.tblout.bed &gt; all_clusters_vs_whole_UK0001_genome_bed_files_comb_and_sort_-u.bed
+</code></pre>
+<p>HMM LOGOS FOR EACH HMM ARE SAVED: /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/NCBI_AND_MY_MIMPS_COMB/CLUSTERS_70_PERC_IDENT_02_02_2021</p>
+<p><strong>Clustering based on 70% identity generated 16 clusters:</strong></p>
+<p>70% Identity:</p>
+<p><img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/all_70_perc_ident_aln.png" alt="all_70_perc_ident_aln.png"></p>
+<p>Each cluster within 70% identity was saved as a PNG and STO using Jalview.</p>
+<table>
+<thead>
+<tr>
+<th>Table x: The number of sequences per cluster, whether the alignment was trimmed to generate the stockholm file, and the file types that were made from the trimmed (if trimmed) alignment.</th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CLUSTER</strong></td>
+<td><strong>NUMBER OF SEQ</strong></td>
+<td><strong>TRIMMED?</strong></td>
+<td><strong>PNG</strong></td>
+<td><strong>STOCK</strong></td>
+<td><strong>KEEP?</strong></td>
+</tr>
+<tr>
+<td>0</td>
+<td>17</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>1</td>
+<td>4</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td>25</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td>34</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>4</td>
+<td>5</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>5</td>
+<td>2</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>6</td>
+<td>3</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>7</td>
+<td>34</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>8</td>
+<td>47</td>
+<td>YES</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>9</td>
+<td>6</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>10</td>
+<td>6</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>11</td>
+<td>4</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>12</td>
+<td>2</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>13</td>
+<td>1</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+<tr>
+<td>14</td>
+<td>5</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>15</td>
+<td>3</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td></td>
+</tr>
+<tr>
+<td>16</td>
+<td>1</td>
+<td>NO</td>
+<td>Y</td>
+<td>Y</td>
+<td>?</td>
+</tr>
+</tbody>
+</table>
+<p>Those 16 clusters were used to generate hmms</p>
+<pre><code>for i in $(cat Cluster_list_70_perc_ident.txt); do hmmbuild --dna ${i}.hmm  ${i}_aln.sto ; done
+
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_0_aln.sto
+# output HMM file:                  Cluster_0.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_0_aln           17   250   224   427     2.71  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.05
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_1_aln.sto
+# output HMM file:                  Cluster_1.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_1_aln            4   367   367   524     1.82  0.619 
+
+# CPU time: 0.05u 0.00s 00:00:00.05 Elapsed: 00:00:00.06
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_10_aln.sto
+# output HMM file:                  Cluster_10.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_10_aln           6   223   223   354     1.74  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_11_aln.sto
+# output HMM file:                  Cluster_11.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_11_aln           4   223   222   353     1.75  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_12_aln.sto
+# output HMM file:                  Cluster_12.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_12_aln           2   222   222   353     1.70  0.621 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_13_aln.sto
+# output HMM file:                  Cluster_13.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_13_aln           1   222   222   362     1.00  0.342 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_14_aln.sto
+# output HMM file:                  Cluster_14.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_14_aln           5   217   217   347     1.68  0.618 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.04
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_15_aln.sto
+# output HMM file:                  Cluster_15.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_15_aln           3   217   217   347     1.68  0.620 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_16_aln.sto
+# output HMM file:                  Cluster_16.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_16_aln           1   216   216   355     1.00  0.348 
+
+# CPU time: 0.02u 0.00s 00:00:00.02 Elapsed: 00:00:00.02
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_2_aln.sto
+# output HMM file:                  Cluster_2.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_2_aln           25   233   215   369     2.47  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_3_aln.sto
+# output HMM file:                  Cluster_3.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_3_aln           34   380   215   454     2.88  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_4_aln.sto
+# output HMM file:                  Cluster_4.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_4_aln            5   313   313   462     1.66  0.619 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.04
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_5_aln.sto
+# output HMM file:                  Cluster_5.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_5_aln            2   245   245   381     1.67  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_6_aln.sto
+# output HMM file:                  Cluster_6.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_6_aln            3   245   245   381     1.68  0.621 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_7_aln.sto
+# output HMM file:                  Cluster_7.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_7_aln           34   222   207   332     2.36  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_8_aln.sto
+# output HMM file:                  Cluster_8.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_8_aln           47   227   207   332     2.32  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+# hmmbuild :: profile HMM construction from multiple sequence alignments
+# HMMER 3.3.1 (Jul 2020); http://hmmer.org/
+# Copyright (C) 2020 Howard Hughes Medical Institute.
+# Freely distributed under the BSD open source license.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# input alignment file:             Cluster_9_aln.sto
+# output HMM file:                  Cluster_9.hmm
+# input alignment is asserted as:   DNA
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# idx name                  nseq  alen  mlen     W eff_nseq re/pos description
+#---- -------------------- ----- ----- ----- ----- -------- ------ -----------
+1     Cluster_9_aln            6   227   227   359     1.73  0.620 
+
+# CPU time: 0.03u 0.00s 00:00:00.03 Elapsed: 00:00:00.03
+</code></pre>
+<p>HMM LOGOS FOR EACH HMM ARE SAVED: /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/NCBI_AND_MY_MIMPS_COMB/CLUSTERS_70_PERC_IDENT_02_02_2021</p>
+<p></p>
+<p>Alike the 80% identity HMMs, the UK0001 genome was searched for mimps. A .bed file was made for each cluster, and the files were merged.</p>
+<p>Here are the locations of the mimps from the various mimp searches and the corresponding SIX gene locations (I could not fit a scale bar to the bar charts).
+<img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/image-1.png" alt="image-1.png"></p>
+<p>Each Mimp finding method was then used in the Maei pipeline and the total number of effectors compared. The MIMP FINDER script and the NCBI AND MY MIMPS HMM had a greater percentage of predicted effectors from the input sequences (predicted by EffectorP).</p>
+<p>The raw data can be found here: /Users/u1983390/Fusarium_data/MIMPS/MIMP_HMM/All_HMM_Search_methods_compared.xlsx 
+<a href="./file/All_HMM_Search_methods_compared-1.xlsx">All_HMM_Search_methods_compared-1.xlsx</a></p>
+<p>A summary table of the number of sequences and number of effectors predicted using the various mimp searching methods with the Maei pipeline.
+<img src="file:////Volumes/Jamie_EXT/Projects/Maei/dev/notes/image/image-2.png" alt="image-2.png"></p>
+<p></p>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
