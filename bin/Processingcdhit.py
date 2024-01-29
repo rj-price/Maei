@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import sys
 
+pd.set_option('display.max_columns', None)
+
 infile = sys.argv[1] #Infile argument for the command line. 
 
 column_names=["Cluster","header"] #Name the two columns pandas will detect. 
@@ -14,7 +16,8 @@ clstr.loc[clstr['Cluster'].str.isnumeric(), 'Cluster'] = np.nan # Fill each sect
 clstr['Cluster'].fillna(method = 'ffill', inplace=True) #Replace all null values with the string in the pervious cell. 
 clstr.dropna(inplace=True) #Drop the rows with remaining NaN values (the orgignal rows with just the >Cluster * name)
 clstr['Cluster'] = clstr['Cluster'].map(lambda x: x.lstrip('>')) #Remove ">" from the Cluster column 
-clstr[['Size (aa)','Genome', 'Name', 'Identity']] = clstr['header'].str.split(', >|.fna;;_| ...', expand=True) #Split the header column in to size and sequence Name
+print(clstr)
+clstr[['Size (aa)','Genome', 'Name', 'Identity']] = clstr['header'].str.split(', >|.fna;;_| ...', expand=True, n=3) #Split the header column in to size and sequence Name
 clstr.drop(columns='header', inplace=True) #Drop the header column, as we have now split this column 
 clstr['Name'] = clstr['Name'].str.split('\.\.\.').str[:-1].str.join('\.\.\.') #Remove the additional characters added by cd-hit.
 clstr['Size (aa)'] = clstr['Size (aa)'].str.split('aa').str[:-1].str.join('aa') #Remove "aa," added to the aa size by cdhit.
