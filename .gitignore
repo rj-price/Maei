@@ -16,6 +16,11 @@ Thumbs.db
 # Directories with data #
 #########################
 data/
-exp/
+exp/Cubense_and_Species_Complex
+exp/SY-2_assembly_V2
+exp/TEF-PhyloOfIsolates
+exp/AllFusAnalysis-Chap3/BlastOfNRsetAgaintsGenomes
+exp/AllFusAnalysis-Chap3/Maei
 README.html
 LICENSE.html
+.Rproj.user
