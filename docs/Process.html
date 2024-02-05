@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Running Maei to identify candidate effectors in &ast;F&period; oxysporum&ast;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="running-maei-to-identify-candidate-effectors-in-f-oxysporum">Running Maei to identify candidate effectors in <em>F. oxysporum</em></h1>
+<p>All scripts referenced and used in this doc can be found in the <a href="https://github.com/JamiePike/Maei/tree/main/bin"><code>bin</code></a> directory for this repository.</p>
+<h2 id="f-oxysporum-genome-database"><em>F. oxysporum</em> genome database</h2>
+<table>
+<thead>
+<tr>
+<th>Species</th>
+<th>Race</th>
+<th>Isolate ID</th>
+<th>Accession</th>
+<th>Size (Mb)</th>
+<th>Contig No.</th>
+<th>Contig N50 (Mb)</th>
+<th>GC (%)</th>
+<th>Completeness (% complete BUSCOs)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>F. graminearum</em></td>
+<td></td>
+<td>PH-1</td>
+<td>GCA_000240135.3</td>
+<td>38</td>
+<td>5</td>
+<td>9.3</td>
+<td>48.2</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>apii</em></td>
+<td>2</td>
+<td>AJ720<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></td>
+<td>--</td>
+<td>64.6</td>
+<td>29</td>
+<td>4.1</td>
+<td>47.9</td>
+<td>97.3</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>apii</em></td>
+<td>2</td>
+<td>207.A</td>
+<td>GCA_014843455.1</td>
+<td>64.7</td>
+<td>49</td>
+<td>3.5</td>
+<td>47.5</td>
+<td>98.7</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>apii</em></td>
+<td>3</td>
+<td>NRRL38295</td>
+<td>GCA_014843565.1</td>
+<td>65.3</td>
+<td>75</td>
+<td>4</td>
+<td>47.5</td>
+<td>98.8</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>apii</em></td>
+<td>4</td>
+<td>AJ498<sup class="footnote-ref"><a href="#fn1" id="fnref1:1">[1:1]</a></sup></td>
+<td>--</td>
+<td>64.6</td>
+<td>58</td>
+<td>2.4</td>
+<td>47.8</td>
+<td>96.2</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>apii</em></td>
+<td>4</td>
+<td><a href="http://274.AC">274.AC</a></td>
+<td>GCA_014843555.1</td>
+<td>67.3</td>
+<td>114</td>
+<td>4.4</td>
+<td>47.5</td>
+<td>98.8</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>capsici</em></td>
+<td></td>
+<td>Focpep1</td>
+<td>GCA_016801315.1</td>
+<td>54.5</td>
+<td>34</td>
+<td>5</td>
+<td>47.5</td>
+<td>93.5</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cepae</em></td>
+<td>2</td>
+<td>FoC_Fus2</td>
+<td>GCA_003615085.1</td>
+<td>53.4</td>
+<td>34</td>
+<td>4.1</td>
+<td>47.5</td>
+<td>99</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>conglutinans</em></td>
+<td></td>
+<td>Fo5176</td>
+<td>GCA_014154955.1</td>
+<td>68</td>
+<td>25</td>
+<td>3.4</td>
+<td>48</td>
+<td>99.1</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>coriandrii</em></td>
+<td></td>
+<td>AJ615<sup class="footnote-ref"><a href="#fn1" id="fnref1:2">[1:2]</a></sup></td>
+<td>--</td>
+<td>69.3</td>
+<td>45</td>
+<td>3</td>
+<td>48</td>
+<td>97.5</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>coriandrii</em></td>
+<td></td>
+<td>3-2</td>
+<td>GCA_014843415.1</td>
+<td>65.4</td>
+<td>49</td>
+<td>5</td>
+<td>47.5</td>
+<td>98.7</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>coriandrii</em></td>
+<td></td>
+<td>GL306</td>
+<td>GCA_014843445.1</td>
+<td>65</td>
+<td>50</td>
+<td>4.9</td>
+<td>47.5</td>
+<td>98.8</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>1</td>
+<td>160527</td>
+<td>GCA_005930515.1</td>
+<td>51.1</td>
+<td>12</td>
+<td>4.9</td>
+<td>47</td>
+<td>99.1</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>1</td>
+<td>60</td>
+<td>GWHAAST00000000</td>
+<td>48.6</td>
+<td>35</td>
+<td>2.1</td>
+<td>47.6</td>
+<td>95.2</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>1</td>
+<td>N2</td>
+<td>GCA_000350345.1</td>
+<td>47.7</td>
+<td>2,185</td>
+<td>0.1</td>
+<td>48</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>4</td>
+<td>C1HIR_9889</td>
+<td>GCA_001696625.1</td>
+<td>46.7</td>
+<td>1,318</td>
+<td>0.09</td>
+<td>48.5</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>4</td>
+<td>B2</td>
+<td>GCA_000350365.1</td>
+<td>52.9</td>
+<td>3,834</td>
+<td>0.02</td>
+<td>48</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>TR4</td>
+<td>UK0001</td>
+<td>GCA_007994515.1</td>
+<td>48.6</td>
+<td>15</td>
+<td>4.5</td>
+<td>47.5</td>
+<td>98.4</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>TR4</td>
+<td>58</td>
+<td>GWHAASU00000000</td>
+<td>48.2</td>
+<td>29</td>
+<td>4.4</td>
+<td>47.5</td>
+<td>96.9</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>TR4</td>
+<td>Pers4</td>
+<td>GCA_021237285.1</td>
+<td>46.4</td>
+<td>115</td>
+<td>1.6</td>
+<td>47.5</td>
+<td>97.7</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td>TR4</td>
+<td>II5_54006</td>
+<td>GCA_000260195.2</td>
+<td>46.6</td>
+<td>716</td>
+<td>0.3</td>
+<td>47.5</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td></td>
+<td>VPRI44082</td>
+<td>GCA_025216935.1</td>
+<td>46.3</td>
+<td>666</td>
+<td>0.3</td>
+<td>47</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td></td>
+<td>VPRI44083</td>
+<td>GCA_025216865.1</td>
+<td>46.3</td>
+<td>666</td>
+<td>0.3</td>
+<td>47</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td></td>
+<td>VPRI44081</td>
+<td>GCA_025216985.1</td>
+<td>47.2</td>
+<td>902</td>
+<td>0.4</td>
+<td>47</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td></td>
+<td>VPRI44079</td>
+<td>GCA_025216905.1</td>
+<td>49.5</td>
+<td>1,801</td>
+<td>0.3</td>
+<td>47.5</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>cubense</em></td>
+<td></td>
+<td>VPRI44084</td>
+<td>GCA_025216845.1</td>
+<td>50.2</td>
+<td>2,807</td>
+<td>0.3</td>
+<td>47.5</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> endophyte</td>
+<td>np</td>
+<td>Fo47<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup></td>
+<td>GCA_013085055.1</td>
+<td>50.4</td>
+<td>12</td>
+<td>4.5</td>
+<td>47.5</td>
+<td>99</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lactucae</em></td>
+<td>1</td>
+<td>AJ865<sup class="footnote-ref"><a href="#fn1" id="fnref1:3">[1:3]</a></sup></td>
+<td>--</td>
+<td>62.7</td>
+<td>38</td>
+<td>2.7</td>
+<td>47.7</td>
+<td>95.3</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lactucae</em></td>
+<td>1</td>
+<td>AJ718<sup class="footnote-ref"><a href="#fn1" id="fnref1:4">[1:4]</a></sup></td>
+<td>--</td>
+<td>62.1</td>
+<td>39</td>
+<td>2.5</td>
+<td>47.6</td>
+<td>95.6</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lactucae</em></td>
+<td>1</td>
+<td>AJ520<sup class="footnote-ref"><a href="#fn1" id="fnref1:5">[1:5]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup></td>
+<td>--</td>
+<td>62.2</td>
+<td>40</td>
+<td>2.9</td>
+<td>47.6</td>
+<td>95.1</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lactucae</em></td>
+<td>4</td>
+<td>AJ705<sup class="footnote-ref"><a href="#fn1" id="fnref1:6">[1:6]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2:2">[2:2]</a></sup></td>
+<td>--</td>
+<td>66.2</td>
+<td>32</td>
+<td>3</td>
+<td>47.7</td>
+<td>97.7</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lactucae</em></td>
+<td>4</td>
+<td>AJ592<sup class="footnote-ref"><a href="#fn1" id="fnref1:7">[1:7]</a></sup></td>
+<td>--</td>
+<td>66</td>
+<td>36</td>
+<td>2.6</td>
+<td>47.7</td>
+<td>97.5</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lactucae</em></td>
+<td>4</td>
+<td>AJ516<sup class="footnote-ref"><a href="#fn1" id="fnref1:8">[1:8]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2:3">[2:3]</a></sup></td>
+<td>--</td>
+<td>68.8</td>
+<td>37</td>
+<td>3</td>
+<td>47.6</td>
+<td>97.6</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lini</em></td>
+<td></td>
+<td>39</td>
+<td>GCA_012026625.1</td>
+<td>59.2</td>
+<td>34</td>
+<td>3.4</td>
+<td>47.5</td>
+<td>99.5</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>lycopersici</em></td>
+<td>2</td>
+<td>4287</td>
+<td>GCA_001703175.2</td>
+<td>56.2</td>
+<td>47</td>
+<td>4.1</td>
+<td>47.5</td>
+<td>99.5</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>matthiolae</em></td>
+<td></td>
+<td>AJ260<sup class="footnote-ref"><a href="#fn2" id="fnref2:4">[2:4]</a></sup></td>
+<td>GCA_020796175.1</td>
+<td>60.3</td>
+<td>40</td>
+<td>4.5</td>
+<td>47.5</td>
+<td>97.8</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>matthiolae</em></td>
+<td></td>
+<td>PHW726_1</td>
+<td>GCA_009755825.1</td>
+<td>57.2</td>
+<td>585</td>
+<td>0.7</td>
+<td>47</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>narcissi</em></td>
+<td></td>
+<td>FON63<sup class="footnote-ref"><a href="#fn1" id="fnref1:9">[1:9]</a></sup></td>
+<td>--</td>
+<td>60</td>
+<td>34</td>
+<td>4</td>
+<td>47.9</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>niveum</em></td>
+<td>np</td>
+<td>110407-3-1-1</td>
+<td>GCA_019593455.1</td>
+<td>49.7</td>
+<td>33</td>
+<td>2.8</td>
+<td>47</td>
+<td>99.8</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>rapae</em></td>
+<td></td>
+<td>Tf1208</td>
+<td>GCA_019157295.1</td>
+<td>59.8</td>
+<td>25</td>
+<td>4.2</td>
+<td>47.5</td>
+<td>99</td>
+</tr>
+<tr>
+<td><em>Fo.</em> from rocket</td>
+<td></td>
+<td>AJ174<sup class="footnote-ref"><a href="#fn1" id="fnref1:10">[1:10]</a></sup></td>
+<td>--</td>
+<td>62.6</td>
+<td>30</td>
+<td>2.7</td>
+<td>47.9</td>
+<td>97.8</td>
+</tr>
+<tr>
+<td><em>Fo.</em> fsp. <em>vasinfectum</em></td>
+<td>1</td>
+<td>TF1</td>
+<td>GCA_009602505.1</td>
+<td>50</td>
+<td>17</td>
+<td>4.2</td>
+<td>47</td>
+<td>98.8</td>
+</tr>
+<tr>
+<td><em>F. sacchari</em></td>
+<td>1</td>
+<td>FS66</td>
+<td>GCA_017165645.1</td>
+<td>47.5</td>
+<td>47</td>
+<td>2</td>
+<td>48</td>
+<td>99.5</td>
+</tr>
+<tr>
+<td><em>F. sacchari</em></td>
+<td></td>
+<td>NRRL 66326</td>
+<td>GCA_013759005.1</td>
+<td>42.8</td>
+<td>515</td>
+<td>0.2</td>
+<td>49</td>
+<td>--</td>
+</tr>
+<tr>
+<td><em>Fusarium</em><sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup></td>
+<td></td>
+<td>S6<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup><sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup></td>
+<td>--</td>
+<td>47.2</td>
+<td>6,048</td>
+<td>0.07</td>
+<td>47.9</td>
+<td>97.5</td>
+</tr>
+<tr>
+<td><em>Fusarium</em><sup class="footnote-ref"><a href="#fn3" id="fnref3:1">[3:1]</a></sup></td>
+<td></td>
+<td>S16<sup class="footnote-ref"><a href="#fn4" id="fnref4:1">[4:1]</a></sup><sup class="footnote-ref"><a href="#fn5" id="fnref5:1">[5:1]</a></sup></td>
+<td>--</td>
+<td>44.9</td>
+<td>768</td>
+<td>0.2</td>
+<td>47.6</td>
+<td>97.4</td>
+</tr>
+<tr>
+<td><em>Fusarium</em><sup class="footnote-ref"><a href="#fn3" id="fnref3:2">[3:2]</a></sup></td>
+<td></td>
+<td>S32<sup class="footnote-ref"><a href="#fn4" id="fnref4:2">[4:2]</a></sup><sup class="footnote-ref"><a href="#fn5" id="fnref5:2">[5:2]</a></sup></td>
+<td>--</td>
+<td>40.9</td>
+<td>2,443</td>
+<td>0.09</td>
+<td>48.9</td>
+<td>97.4</td>
+</tr>
+<tr>
+<td><em>Fusarium</em><sup class="footnote-ref"><a href="#fn3" id="fnref3:3">[3:3]</a></sup></td>
+<td></td>
+<td>SY-2<sup class="footnote-ref"><a href="#fn4" id="fnref4:3">[4:3]</a></sup></td>
+<td>--</td>
+<td>44.2</td>
+<td>408</td>
+<td>0.2</td>
+<td>48</td>
+<td>99.6</td>
+</tr>
+</tbody>
+</table>
+<p><em>Unfortunately, md format puts footnotes at the bottom of the doc. They are hyperlinked, however, so you can jump between here and the bottom of the doc by clicking them.</em></p>
+<h2 id="maei-set-up">Maei Set up</h2>
+<p>Once the assembly database (db) had been generated, genome assemblies were acquired from NCBI (manual download from the assembly pages: <a href="https://www.ncbi.nlm.nih.gov/assembly/">https://www.ncbi.nlm.nih.gov/assembly/</a>) or NDCG. Additonal assemblies were provided by collaborators at NAIB.</p>
+<p>The assemblies were place in a folder <code>/Maei/exp/AllFusAnalysis-Chap3/Maei</code></p>
+<p>As most of my scripts are designed to work with the <code>.fna</code> extension, and as it makes it easier for one-liners downstream, I moved any files ending in <code>.fasta</code> to <code>.fna</code> using <code>mv</code>.</p>
+<p>The files were then listed for input into the Maei pipeline</p>
+<pre><code class="language-bash"><span class="hljs-comment"># create reference fasta list.</span>
+<span class="hljs-built_in">ls</span> *.fna &gt; FastaList.txt
+</code></pre>
+<p>I need to remove any spaces in the FASTA headers to prevent truncated headers which can cause issues when using certain packages/software. I used the custom bash script <code>Space_for_underscore.sh</code> for this.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># loop through the genome assemblies and replace spaces for underscores. </span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> $(<span class="hljs-built_in">cat</span> FastaList.txt); <span class="hljs-keyword">do</span> 
+Space_for_underscore.sh -i <span class="hljs-variable">${i}</span> ; <span class="hljs-keyword">done</span> 
+
+<span class="hljs-comment"># this script creates a backup &quot;.bak&quot; file for each genome, where spaces have not been replace. I just deleted these files using rm.</span>
+<span class="hljs-built_in">rm</span> *.bak
+</code></pre>
+<p>I then copied the <a href="https://github.com/JamiePike/Maei/blob/main/dev/notes/Mimp_Searching_Methods.md">reference <em>mimp</em> HMM</a> to the working dir, and ran the <code>Maei_v5.sh</code> pipeline.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># copy hmm built earlier </span>
+<span class="hljs-built_in">cp</span> /[LOCAL PATH TO]/Maei/data/Example_Working_Dir/realn_All.aln.trimmed.hmm ./Mimp.hmm
+
+<span class="hljs-comment"># run maei </span>
+<span class="hljs-built_in">nohup</span> Maei_V5.sh FastaList.txt 0.65 1&gt;Maei.<span class="hljs-built_in">log</span> &amp;
+</code></pre>
+<p>After 8 day, Maei was finished running.</p>
+<h2 id="filtering-the-candidates">Filtering the candidates</h2>
+<p>Now I had a set of candidate effectors for each genome assembly and could cluster the sequences to try and identify shared candidates, but there may be sequences which have been missed using the pipeline in some assemblies, and we need to check to see if they have been missed before developing diagnostics or conducting further analysis. Therefore, I generated a non-redundant set of all candidate effectors to search back against all the genome assemblies using BLAST.</p>
+<p>The pipeline generates an output file <code>./AllCandidateEffectorSets.fasta</code>, which combines all of the individual candidate effector FASTA files from each genome assembly into one FASTA file for all genomes.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># extract of lines 192-198 in Maei_v5.sh</span>
+<span class="hljs-built_in">touch</span> ./AllCandidateEffectorSets.fasta <span class="hljs-comment">#Create an empty file to hold all of the candidate effectors.</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Clustering final effector sets...&quot;</span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> $(<span class="hljs-built_in">cat</span> <span class="hljs-variable">${gL}</span>); 
+  <span class="hljs-keyword">do</span>
+  sed -i <span class="hljs-string">&quot;s/^&gt;/&gt;<span class="hljs-variable">${i}</span>;;_/&quot;</span> <span class="hljs-string">&quot;<span class="hljs-variable">$i</span>&quot;</span> <span class="hljs-variable">${i}</span>_Results/<span class="hljs-variable">${i}</span>_CandidateEffector.fasta ; <span class="hljs-comment">#Add genome filename to start of Fasta Headers so we know which isolate this came from. </span>
+  <span class="hljs-built_in">cat</span> <span class="hljs-variable">${i}</span>_Results/<span class="hljs-variable">${i}</span>_CandidateEffector.fasta &gt;&gt; ./AllCandidateEffectorSets.fasta ; <span class="hljs-comment">#Combine all of the individual candidate effector sets by adding them to the empty candidate effector FASTA.</span>
+<span class="hljs-keyword">done</span>
+</code></pre>
+<p>I used this FASTA and cd-hit to generate the non-redundant set of candidate effectors, where the <code>-i</code> flag (for % identity) is set to <code>1</code> (100% identity).</p>
+<pre><code class="language-bash"><span class="hljs-comment"># use cd-hit to generate a non-redundant set of candiate effectors.</span>
+cd-hit -i ./AllCandidateEffectorSets.fasta -d 0 -o ./AllCandidateEffectorSets-nonredundant -c 1 -n 5  -G 1 -g 0 -b 20 -l 10 -s 0.0 -aL 0.0 -aS 0.0 1&gt; ./cd-hit_nr.log
+</code></pre>
+<p>Now I have a non-redundant set of candidate effectors from all of the genome assemblies I used, I can BLAST them against the input genomes and find candidates which may have been initially missed. For this, I use my <code>BigBlast.sh</code> script. I used tBLASTn and a 65% identity and coverage threshold. E-value is 1e-6 as default.</p>
+<pre><code class="language-bash"><span class="hljs-comment"># blast search the non-redundant set of candidate effectors against all of the genomes used with tblastn. </span>
+BigBlast.sh -q AllCandidateEffectorSets-nonredundant.fasta -g FastaList.txt -i 65 -c 65 -t tblastn -b
+
+<span class="hljs-comment"># move the file out of the current dir </span>
+<span class="hljs-built_in">mv</span> BigBlast_tblastn_29-01-23 ../BlastOfNRsetAgaintsGenomes
+</code></pre>
+<p>Now I have my BLAST results, but I do not necessarily have candidate effectors. Using this BLAST searching method, I often find small hits for sequences that are unlikely to be candidate effectors. To refine the set and increase confidence in my candidates, I filter the BLAST results using SignalP (v5.0b) and EffectorP (v2.0.1).</p>
+<p>I have another shell script for this, <code>FilterBlastHits2.sh</code>. This extracts the sequences from the BLAST hit locations, translates them, then passes them to signalP (v5.0b) followed by EffectorP (v2.0.1).</p>
+<pre><code class="language-bash"><span class="hljs-comment"># filter blast hits </span>
+FilterBlastResults.sh FastaList.txt
+</code></pre>
+<p>The output of this shell script is an FASTA file containing all the filtered BLAST results (candidate effectors). I use this to quantify they total number of candidate effectors identified per genome assembly.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#command to count candidate effectors</span>
+grep -c <span class="hljs-string">&quot;&gt;&quot;</span> */*-EffectorP.filtered.fasta
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Species</th>
+<th>fsp</th>
+<th>race</th>
+<th>isolate code</th>
+<th>No. mimps</th>
+<th>No. candidate effectors</th>
+<th>Genome size (Mb)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>graminearum</em></td>
+<td></td>
+<td></td>
+<td>PH-1</td>
+<td></td>
+<td>6</td>
+<td>38</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>apii</em></td>
+<td>2</td>
+<td>207A</td>
+<td>420</td>
+<td>388</td>
+<td>64.6</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>apii</em></td>
+<td>2</td>
+<td>AJ720</td>
+<td>442</td>
+<td>399</td>
+<td>64.7</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>apii</em></td>
+<td>3</td>
+<td>NRRL38295</td>
+<td></td>
+<td>328</td>
+<td>65.3</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>apii</em></td>
+<td>4</td>
+<td>AJ498</td>
+<td>539</td>
+<td>332</td>
+<td>64.6</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>apii</em></td>
+<td>4</td>
+<td>274AC</td>
+<td></td>
+<td>357</td>
+<td>67.3</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cepae</em></td>
+<td>2</td>
+<td>FoC_Fuc2</td>
+<td>325</td>
+<td>359</td>
+<td>53.4</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>conglutinans</em></td>
+<td></td>
+<td>Fo5176</td>
+<td>442</td>
+<td>385</td>
+<td>68</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>coriandrii</em></td>
+<td></td>
+<td>3-2</td>
+<td>478</td>
+<td>315</td>
+<td>65.4</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>coriandrii</em></td>
+<td></td>
+<td>AJ615</td>
+<td>675</td>
+<td>603</td>
+<td>69.3</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>1</td>
+<td>60</td>
+<td>39</td>
+<td>45</td>
+<td>48.6</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>1</td>
+<td>N2</td>
+<td>141</td>
+<td>63</td>
+<td>47.7</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>1</td>
+<td>160527</td>
+<td>183</td>
+<td>95</td>
+<td>51.1</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>4</td>
+<td>B2</td>
+<td>142</td>
+<td>60</td>
+<td>52.9</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>4</td>
+<td>C1HIR_9889</td>
+<td>145</td>
+<td>70</td>
+<td>46.7</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>TR4</td>
+<td>Pers4</td>
+<td>87</td>
+<td>62</td>
+<td>46.4</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>TR4</td>
+<td>NRRL_54006</td>
+<td>105</td>
+<td>70</td>
+<td>46.6</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>TR4</td>
+<td>58</td>
+<td>165</td>
+<td>108</td>
+<td>48.2</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td>TR4</td>
+<td>UK0001</td>
+<td>160</td>
+<td>127</td>
+<td>48.6</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td></td>
+<td>VPRI44081</td>
+<td>137</td>
+<td>45</td>
+<td>47.2</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td></td>
+<td>VPRI44082</td>
+<td>146</td>
+<td>50</td>
+<td>46.3</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td></td>
+<td>VPRI44083</td>
+<td>146</td>
+<td>50</td>
+<td>46.3</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td></td>
+<td>VPRI44084</td>
+<td>179</td>
+<td>104</td>
+<td>49.5</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>cubense</em></td>
+<td></td>
+<td>VPRI44079</td>
+<td>149</td>
+<td>107</td>
+<td>49.5</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td>endophyte</td>
+<td>np</td>
+<td>Fo47</td>
+<td>70</td>
+<td>81</td>
+<td>50.4</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td>from rocket</td>
+<td></td>
+<td>AJ174</td>
+<td>419</td>
+<td>169</td>
+<td>62.6</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lactucae</em></td>
+<td>1</td>
+<td>AJ718</td>
+<td>536</td>
+<td>260</td>
+<td>62.1</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lactucae</em></td>
+<td>1</td>
+<td>AJ865</td>
+<td>569</td>
+<td>296</td>
+<td>62.7</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lactucae</em></td>
+<td>1</td>
+<td>AJ520</td>
+<td>533</td>
+<td>343</td>
+<td>62.2</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lactucae</em></td>
+<td>4</td>
+<td>AJ592</td>
+<td>615</td>
+<td>482</td>
+<td>66</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lactucae</em></td>
+<td>4</td>
+<td>AJ705</td>
+<td>614</td>
+<td>490</td>
+<td>66.2</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lactucae</em></td>
+<td>4</td>
+<td>AJ516</td>
+<td>522</td>
+<td>548</td>
+<td>68.8</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lini</em></td>
+<td></td>
+<td>39</td>
+<td>263</td>
+<td>237</td>
+<td>59.2</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>lycopersici</em></td>
+<td>2</td>
+<td>4287</td>
+<td>332</td>
+<td>337</td>
+<td>56.2</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>matthiolae</em></td>
+<td></td>
+<td>AJ260</td>
+<td>301</td>
+<td>209</td>
+<td>60.3</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>narcissus</em></td>
+<td></td>
+<td>FON63</td>
+<td>555</td>
+<td>251</td>
+<td>60</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>niveum</em></td>
+<td>np</td>
+<td>110407-3-1-1</td>
+<td>52</td>
+<td>39</td>
+<td>49.7</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>rapae</em></td>
+<td></td>
+<td>Tf1208</td>
+<td>377</td>
+<td>278</td>
+<td>59.8</td>
+</tr>
+<tr>
+<td><em>oxysporum</em></td>
+<td><em>vasinfectum</em></td>
+<td>1</td>
+<td>TF1</td>
+<td>199</td>
+<td>91</td>
+<td>50</td>
+</tr>
+<tr>
+<td><em>sacchari</em></td>
+<td></td>
+<td></td>
+<td>FS66</td>
+<td>9</td>
+<td>12</td>
+<td>47.5</td>
+</tr>
+<tr>
+<td><em>sacchari</em></td>
+<td></td>
+<td></td>
+<td>NRRL_66326</td>
+<td>10</td>
+<td>15</td>
+<td>42.8</td>
+</tr>
+<tr>
+<td>Unconfirmed</td>
+<td></td>
+<td></td>
+<td>SY2</td>
+<td>3</td>
+<td>12</td>
+<td>44.2</td>
+</tr>
+</tbody>
+</table>
+<h2 id="clustering-of-candidate-effectors">Clustering of candidate effectors</h2>
+<p>Now I have my candidate effectors for each isolate, I need to determine the candidate effector profile of all isolates; that is cluster the sequences at a given %ID and see what is shared or unique. First, I must extract all of the candidate effectors into a single FASTA for cd-hit.</p>
+<pre><code class="language-bash"><span class="hljs-comment">#copy the candidate effector fasta files into the current directory so that the full dir name isn&#x27;t added to the start of each sequence.</span>
+<span class="hljs-built_in">cp</span> */*-EffectorP.filtered.fasta ./
+
+<span class="hljs-comment">#use awk to add the fasta header to the start of each sequence so we know which isolate it came from and generate a final file. </span>
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> *-EffectorP.filtered.fasta ; <span class="hljs-keyword">do</span> awk <span class="hljs-string">&#x27;/&gt;/{sub(&quot;&gt;&quot;,&quot;&amp;&quot;FILENAME&quot;_&quot;);sub(/\.fasta/,x)}1&#x27;</span> <span class="hljs-variable">${i}</span> ; <span class="hljs-keyword">done</span> &gt; AllCandidateEffectors-AfterBLASTandFilter.fasta
+
+<span class="hljs-comment">#I can now remove the copied effector fasta files. This will save space. </span>
+<span class="hljs-built_in">rm</span> *-EffectorP.filtered.fasta
+</code></pre>
+<p>I can now use my <code>Maei_Clustering.sh</code> shell script to cluster the candidate effectors at various %ID and see how this effects the candidate effector profiles.</p>
+<pre><code class="language-bash">
+</code></pre>
+<h3 id="table-footnotes">Table footnotes</h3>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>Assemblies generated by collaborators at NIAB. GenBank accession numbers are not currently available. <a href="#fnref1" class="footnote-backref">↩︎</a> <a href="#fnref1:1" class="footnote-backref">↩︎</a> <a href="#fnref1:2" class="footnote-backref">↩︎</a> <a href="#fnref1:3" class="footnote-backref">↩︎</a> <a href="#fnref1:4" class="footnote-backref">↩︎</a> <a href="#fnref1:5" class="footnote-backref">↩︎</a> <a href="#fnref1:6" class="footnote-backref">↩︎</a> <a href="#fnref1:7" class="footnote-backref">↩︎</a> <a href="#fnref1:8" class="footnote-backref">↩︎</a> <a href="#fnref1:9" class="footnote-backref">↩︎</a> <a href="#fnref1:10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>Included in RNA-seq analysis. <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a> <a href="#fnref2:2" class="footnote-backref">↩︎</a> <a href="#fnref2:3" class="footnote-backref">↩︎</a> <a href="#fnref2:4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>Species not confirmed. <a href="#fnref3" class="footnote-backref">↩︎</a> <a href="#fnref3:1" class="footnote-backref">↩︎</a> <a href="#fnref3:2" class="footnote-backref">↩︎</a> <a href="#fnref3:3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>Assemblies generated in association with TNAU. GenBank accession numbers are not currently available. <a href="#fnref4" class="footnote-backref">↩︎</a> <a href="#fnref4:1" class="footnote-backref">↩︎</a> <a href="#fnref4:2" class="footnote-backref">↩︎</a> <a href="#fnref4:3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p>Not included in MAEI pipeline analysis. <a href="#fnref5" class="footnote-backref">↩︎</a> <a href="#fnref5:1" class="footnote-backref">↩︎</a> <a href="#fnref5:2" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
