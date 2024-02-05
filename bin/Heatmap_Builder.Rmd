@@ -11,7 +11,7 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 
 ```{r setup}
 
-knitr::opts_knit$set(root.dir = "/Users/u1983390/Library/CloudStorage/OneDrive-UniversityofWarwick/Research/Genomics/Projects/BBSRC-FoCeleryProject/Maei/BLASTofCombinedEffectorSet")
+knitr::opts_knit$set(root.dir = "/Volumes/Jamie_EXT/Projects/Maei/exp/AllFusAnalysis-Chap3/")
 
 ```
 
@@ -29,7 +29,7 @@ library(pheatmap)
 library(matrixStats)
 library(knitr)
 
-Effectors <- read.csv("./DistributionOfCanidateEffectors.csv")
+Effectors <- read.csv("./AllCandidateEffectorSet-AfterBLASTandFilter_cd-hit.out.0.65.clstr_heatmapdata.csv")
 ```
 
 
@@ -48,7 +48,7 @@ ncol(Effectors) #Should equal the number of candidate effectors.
 ```{r}
 #Set Heatmap data.
 Effectors %>%
-  select(4:323) %>%
+  select(1:326) %>%
   column_to_rownames("Isolate") -> selected_heatmap #n = 73 as we do not want to include the race data in the last column. 
 
 #Calculate the number of columns in the df.
@@ -76,21 +76,22 @@ cl_cb = function(hc_effs, mat){
     return(hclust_olo)
 }
 
-# HeatmapData_Binary %>%
-#     hclust() -> hc_fsp
-# cl_cb <- function(hc_fsp, mat){
-#     dists <- dist(mat, method = "binary")
-#     # Perform reordering according to OLO method
-#     hclust_olo <- reorder(hc_fsp, 1:27)
-#     return(hclust_olo)
-# }
+HeatmapData_Binary %>%
+    dist(, method = "binary") %>%
+    hclust() -> hc_fsp
+cl_cb <- function(hc_fsp, mat){
+    dists <- dist(mat, method = "binary")
+    # Perform reordering according to OLO method
+    hclust_olo <- reorder(hc_fsp, 1:27)
+    return(hclust_olo)
+}
 ```
 
 
 ```{r}
 #Add race annotations 
 Effectors %>% 
-  select(1:4)  %>% 
+  select(1,327:328)  %>% 
   column_to_rownames("Isolate") -> row_annotations
 print(row_annotations)
 ```
@@ -104,56 +105,47 @@ final_heatmap <- pheatmap(HeatmapData_Binary,
                           legend_labels = c("Present", "Absent"),
                           drop_levels = F,
                           clustering_distance_rows = "binary",
-                          #clustering_callback = cl_cb,
-                          cellwidth = 7, 
-                          cellheight = 45,
+                          clustering_distance_cols = "binary",
+                          cellwidth = 4, 
+                          cellheight = 12,
                           border_color = "grey",
                           annotation_row = row_annotations,
                           annotation_colors = list(
                             Forma_specialis = c(
-                              "apii" = "lightskyblue",
+                              "apii" = "slategray1",
                               "cepae" = "purple",
-                              "conglutinans" = "orange",
-                              "coriandrii" = "pink",
-                              "cubense" = "khaki1",
-                              "lactucae" = "green3",
+                              "conglutinans" = "rosybrown",
+                              "coriandrii" = "darkorange",
+                              "cubense" = "gold",
+                              "lactucae" = "forestgreen",
                               "lini" = "indianred",
                               "lycopersici" = "red",
                               "matthiolae" = "blue",
-                              "narcissi" = "yellow",
+                              "narcissi" = "lavender",
                               "niveum" = "brown",
-                              "rapae" = "darkgreen",
-                              "from rocket" = "lightgreen",
+                              "rapae" = "slateblue",
+                              "from rocket" = "tan",
                               "vasinfectum" = "greenyellow",
-                              "non-pathogen" = "black" ),
+                              "endophyte" = "black",
+                              "N/A" = "white"),
                             Race = c(
-                              "NA" = "white",
+                              "np" = "bisque",
                               "Race 1" = "gold4",
                               "Race 2" = "yellow",
                               "Race 3" = "lightblue",
                               "Race 4" = "navy",
-                              "Tropical Race 4" = "green4"),
-                            Collection_Location = c(
-                              "Portugal" = "orange",
-                              "USA" = "red",
-                              "NA" = "white",
-                              "UK" = "blue",
-                              "Australia" = "yellow",
-                              "Japan" = "green",
-                              "tbc" = "white",
-                              "Russia" = "brown",
-                              "Spain" = "pink")
-                            ),
-                          fontsize_col = 10,
-                          fontsize = 24,
+                              "Tropical Race 4" = "green4",
+                              "N/A" = "white")),
+                          fontsize_col = 5,
+                          fontsize = 16,
                           treeheight_row = 300,
                           treeheight_col = 80,
                           angle_col = 90,
-                          cutree_rows = 17,
+                          cutree_rows = 24,
                           na_col = "white",
-                          filename = "./FolaEffectorsHeatmap.pdf",
-                          height = 25,
-                          width = 48)
+                          filename = "./EffectorsHeatmap-65percid.pdf",
+                          height = 30,
+                          width = 38)
 ```
 
 

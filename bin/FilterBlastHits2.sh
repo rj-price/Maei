@@ -3,8 +3,6 @@
 
 set -e 
 
-#Set Path for correct version of SignalP
-Run_SignalP=/home/u1983390/apps/FoEC/signalp-4.1/signalp   
 
 ###################
 gL=${1?Error: no list of FASTAs given. \n Please provide a .txt file containing a list of FASTAs for analysis}

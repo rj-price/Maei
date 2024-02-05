@@ -17,7 +17,7 @@ clstr['Cluster'].fillna(method = 'ffill', inplace=True) #Replace all null values
 clstr.dropna(inplace=True) #Drop the rows with remaining NaN values (the orgignal rows with just the >Cluster * name)
 clstr['Cluster'] = clstr['Cluster'].map(lambda x: x.lstrip('>')) #Remove ">" from the Cluster column 
 print(clstr)
-clstr[['Size (aa)','Genome', 'Name', 'Identity']] = clstr['header'].str.split(', >|.fna;;_| ...', expand=True, n=3) #Split the header column in to size and sequence Name
+clstr[['Size (aa)','Genome', 'Name', 'Identity']] = clstr['header'].str.split(', >|-EffectorP.filtered_| ...', expand=True, n=3) #Split the header column in to size and sequence Name
 clstr.drop(columns='header', inplace=True) #Drop the header column, as we have now split this column 
 clstr['Name'] = clstr['Name'].str.split('\.\.\.').str[:-1].str.join('\.\.\.') #Remove the additional characters added by cd-hit.
 clstr['Size (aa)'] = clstr['Size (aa)'].str.split('aa').str[:-1].str.join('aa') #Remove "aa," added to the aa size by cdhit.
