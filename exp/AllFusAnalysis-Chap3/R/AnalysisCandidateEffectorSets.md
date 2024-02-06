@@ -169,7 +169,7 @@ knitr::kable(stats_data)
 | F. oxysporum   | apii         | NRRL38295    |   210 |                 328 |          65.3 |
 | F. oxysporum   | cepae        | FoC_Fus2     |   325 |                 359 |          53.4 |
 | F. oxysporum   | conglutinans | Fo5176       |   442 |                 385 |          68.0 |
-| F. oxysporum   | coriandrii   | 03-Feb       |   478 |                 315 |          65.4 |
+| F. oxysporum   | coriandrii   | 3-2          |   478 |                 315 |          65.4 |
 | F. oxysporum   | coriandrii   | AJ615        |   675 |                 603 |          69.3 |
 | F. oxysporum   | cubense      | 58           |   165 |                 108 |          48.2 |
 | F. oxysporum   | cubense      | 60           |    39 |                  45 |          48.6 |
@@ -229,6 +229,126 @@ summary(stats_data$assembly_size)
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##   38.00   47.83   53.15   55.40   64.12   69.30
+
+I also want to look at specific fsp. to determine if the avernage number
+of effectors, *mimps*, and genome size is smaller compared to other fsp.
+To do this, I `subset` the fsp. I am interested in and then use the
+`summary` function in R.
+
+``` r
+# ---- subset the fsp of interest ---- #
+# cubense
+foc_stats <- subset(metadata, grepl("Fo._fsp._cubense", label))
+summary(foc_stats)
+```
+
+    ##     label            full_name           species          species_group     
+    ##  Length:14          Length:14          Length:14          Length:14         
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##      fsp            isolate_code           race              source         
+    ##  Length:14          Length:14          Length:14          Length:14         
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##    no._mimps     no._cand_effs     genome_size   
+    ##  Min.   : 39.0   Min.   : 45.00   Min.   :46.30  
+    ##  1st Qu.:138.0   1st Qu.: 52.50   1st Qu.:46.62  
+    ##  Median :145.5   Median : 66.50   Median :47.95  
+    ##  Mean   :137.4   Mean   : 75.43   Mean   :48.26  
+    ##  3rd Qu.:157.2   3rd Qu.:101.75   3rd Qu.:49.27  
+    ##  Max.   :183.0   Max.   :127.00   Max.   :52.90
+
+``` r
+# lactucae
+fola_stats <- subset(metadata, grepl("Fo._fsp._lactucae", label))
+summary(fola_stats)
+```
+
+    ##     label            full_name           species          species_group     
+    ##  Length:6           Length:6           Length:6           Length:6          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##      fsp            isolate_code           race              source         
+    ##  Length:6           Length:6           Length:6           Length:6          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##    no._mimps     no._cand_effs    genome_size   
+    ##  Min.   :522.0   Min.   :260.0   Min.   :62.10  
+    ##  1st Qu.:533.8   1st Qu.:307.8   1st Qu.:62.33  
+    ##  Median :552.5   Median :412.5   Median :64.35  
+    ##  Mean   :564.8   Mean   :403.2   Mean   :64.67  
+    ##  3rd Qu.:602.8   3rd Qu.:488.0   3rd Qu.:66.15  
+    ##  Max.   :615.0   Max.   :548.0   Max.   :68.80
+
+``` r
+# apii 
+foa_stats <- subset(metadata, grepl("Fo._fsp._apii", label))
+summary(foa_stats)
+```
+
+    ##     label            full_name           species          species_group     
+    ##  Length:5           Length:5           Length:5           Length:5          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##      fsp            isolate_code           race              source         
+    ##  Length:5           Length:5           Length:5           Length:5          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##    no._mimps     no._cand_effs    genome_size  
+    ##  Min.   :210.0   Min.   :328.0   Min.   :64.6  
+    ##  1st Qu.:217.0   1st Qu.:332.0   1st Qu.:64.6  
+    ##  Median :420.0   Median :357.0   Median :64.7  
+    ##  Mean   :365.6   Mean   :360.8   Mean   :65.3  
+    ##  3rd Qu.:442.0   3rd Qu.:388.0   3rd Qu.:65.3  
+    ##  Max.   :539.0   Max.   :399.0   Max.   :67.3
+
+``` r
+# coriandrii
+foci_stats <- subset(metadata, grepl("Fo._fsp._coriandrii", label)) 
+foci_stats <- foci_stats %>%
+  drop_na(no._mimps)
+summary(foci_stats)
+```
+
+    ##     label            full_name           species          species_group     
+    ##  Length:2           Length:2           Length:2           Length:2          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##      fsp            isolate_code           race              source         
+    ##  Length:2           Length:2           Length:2           Length:2          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##    no._mimps     no._cand_effs  genome_size   
+    ##  Min.   :478.0   Min.   :315   Min.   :65.40  
+    ##  1st Qu.:527.2   1st Qu.:387   1st Qu.:66.38  
+    ##  Median :576.5   Median :459   Median :67.35  
+    ##  Mean   :576.5   Mean   :459   Mean   :67.35  
+    ##  3rd Qu.:625.8   3rd Qu.:531   3rd Qu.:68.33  
+    ##  Max.   :675.0   Max.   :603   Max.   :69.30
 
 ### Correlation and distribution
 
@@ -468,15 +588,16 @@ stats_plot <- ggplot(aes(x=reorder(ID, mimps_and_candidate_effectors)),   #Creat
   scale_colour_manual(" ", values=c("Assembly Size" = "black"))+
   theme_bw()+
   theme(legend.box="verticle",
-        legend.title = element_blank())+
+        legend.title = element_blank(),
+        legend.position = "bottom")+
   xlab("") +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())+
   theme(axis.text.x = element_text(angle = 90,         #Adjust the text orientation on the x axis
                                    vjust = 0.5, 
                                    hjust=1,
-                                   size = 8))+
-  theme(axis.text = element_text(size = 8))+
+                                   size = 12))+
+  theme(axis.text = element_text(size = 12))+
   scale_y_continuous(name= "Total number of mimps \nand candidate effectors", #Increase ticks on Y axis.
                      breaks = scales::pretty_breaks(n = 10),                     #Create regular breaks in the Y axis. 
                      sec.axis = sec_axis( trans=~.*scale_right,                   #Insert second Y axis for the assembly size. Calculated using the right-hand scale.   
@@ -497,7 +618,7 @@ effectors, <em>mimps</em> and assembly size.</figcaption>
 
 ``` r
 #Prepare png of file 
-ggsave("StatsOverview.png", width = 15, height = 10)
+ggsave("StatsOverview.png", width = 10, height = 10)
 ```
 
 ### Additional statsistics
@@ -536,10 +657,9 @@ race_plot_data <- select(metadata,"species", "species_group", "fsp", "race" ,"is
 
 
 # ---- subset metadata ---- #
-# extract only the fsp we are interested in 
-race_plot_data_subset <- subset(race_plot_data, grepl("lactucae|apii|cubense", fsp)) %>% 
+# extract only the fsp we are interested in and drop isolates which don't have a race classification
+race_plot_data_subset <- subset(race_plot_data, grepl("lactucae|apii|cubense", fsp)) %>%
   drop_na(race)
-
 
 # ---- funky cheats to lable the facet plot nicely --- #
 
@@ -556,12 +676,14 @@ mimpsandcandeffs <- ggplot(race_plot_data_subset, aes(x=race, y=mimps_and_candid
   geom_boxplot(aes(fill = Legend)) +
   facet_wrap(~ fsp, labeller = labeller(Legend = new_labels_y, fsp = new_labels_x), scales = "free_x") +  # split the plot by fsp and then mimps/candidate effectors
   labs(x = "Race", 
-       y = "Count") +
+       y = "Total number of mimps \nand candidate effectors") +
   scale_fill_manual(values = c("candidate_effectors" = "darkolivegreen", "mimps" = "#DDE0DA"), label=c("mimps", "candidate effectors")) +
+  theme_bw() +
   theme(strip.text.y = element_blank(),  # remove the side names as we have this shown in colour now. 
-        panel.grid.major = element_line(), # put the lines back in 
+        panel.grid.major = element_blank(), # put the lines back in 
         legend.position = "bottom", 
-        legend.title = element_blank())
+        legend.title = element_blank()) 
+
 #plot it 
 plot(mimpsandcandeffs)
 ```
@@ -570,8 +692,75 @@ plot(mimpsandcandeffs)
 
 ``` r
 #save the plot
-ggsave("MimpsAndCandEffs_CubenseOnly.png", width = 20, height = 10)
+ggsave("MimpsAndCandEffs_FspOfInterest.png", width = 10, height = 10)
 ```
+
+I want to put some values to this to dicuss in the text of my thesis.
+
+``` r
+# ---- subset the fsp of interest ---- #
+# cubense
+foc_stats_sum <- foc_stats %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(label),
+            mean_mimp = mean(no._mimps),
+            min_mimp = min(no._mimps),
+            max_mimp= max(no._mimps),
+            mean_eff = mean(no._cand_effs),
+            min_eff = min(no._cand_effs),
+            max_eff = max(no._cand_effs),
+            sum_eff = sum(no._cand_effs))
+# lactucae
+fola_stats_sum <- fola_stats %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(label),
+            mean_mimp = mean(no._mimps),
+            min_mimp = min(no._mimps),
+            max_mimp= max(no._mimps),
+            mean_eff = mean(no._cand_effs),
+            min_eff = min(no._cand_effs),
+            max_eff = max(no._cand_effs),
+            sum_eff = sum(no._cand_effs))
+# apii 
+foa_stats_sum <- foa_stats  %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(label),
+            mean_mimp = mean(no._mimps),
+            min_mimp = min(no._mimps),
+            max_mimp= max(no._mimps),
+            mean_eff = mean(no._cand_effs),
+            min_eff = min(no._cand_effs),
+            max_eff = max(no._cand_effs),
+            sum_eff = sum(no._cand_effs))
+
+# print it nicely
+knitr::kable(foc_stats_sum)
+```
+
+| race            | count | mean_mimp | min_mimp | max_mimp | mean_eff | min_eff | max_eff | sum_eff |
+|:----------------|------:|----------:|---------:|---------:|---------:|--------:|--------:|--------:|
+| Race 1          |     3 |     121.0 |       39 |      183 | 67.66667 |      45 |      95 |     203 |
+| Tropical Race 4 |     6 |     134.0 |       87 |      165 | 82.83333 |      60 |     127 |     497 |
+| NA              |     5 |     151.4 |      137 |      179 | 71.20000 |      45 |     107 |     356 |
+
+``` r
+knitr::kable(fola_stats_sum)
+```
+
+| race   | count | mean_mimp | min_mimp | max_mimp | mean_eff | min_eff | max_eff | sum_eff |
+|:-------|------:|----------:|---------:|---------:|---------:|--------:|--------:|--------:|
+| Race 1 |     3 |  546.0000 |      533 |      569 | 299.6667 |     260 |     343 |     899 |
+| Race 4 |     3 |  583.6667 |      522 |      615 | 506.6667 |     482 |     548 |    1520 |
+
+``` r
+knitr::kable(foa_stats_sum)
+```
+
+| race   | count | mean_mimp | min_mimp | max_mimp | mean_eff | min_eff | max_eff | sum_eff |
+|:-------|------:|----------:|---------:|---------:|---------:|--------:|--------:|--------:|
+| Race 2 |     2 |       431 |      420 |      442 |    393.5 |     388 |     399 |     787 |
+| Race 3 |     1 |       210 |      210 |      210 |    328.0 |     328 |     328 |     328 |
+| Race 4 |     2 |       378 |      217 |      539 |    344.5 |     332 |     357 |     689 |
 
 ## Candidate effector distribution
 
@@ -617,9 +806,9 @@ heatmap_dat to p4, so I have to rebuild p4.
 # ---- Build the full figure ---- #
 p2 <- p +  
   geom_treescale(x = 0, y = 1, width = 0.004) + 
-  geom_tiplab(aes(label = full_name), offset = 0.001) +
-  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.028, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "black", offset = 0.047, linetype = "blank", geom = "text", align = TRUE)+
+  geom_tiplab(aes(label = full_name), offset = 0.0015) +
+  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.05, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = race), color = "black", offset = 0.088, linetype = "blank", geom = "text", align = TRUE)+
   geom_tippoint(aes(shape = source), size = 3) +
   geom_rootedge() +
   theme(legend.position = "bottom")
@@ -628,7 +817,7 @@ p2 <- p +
 p3 <- p2 + new_scale_fill()
 # add race data
 p4 <- gheatmap(p3, fsp_df,
-               offset = 0.02, 
+               offset = 0.04, 
                width = 0.03,
                color = "black",
                colnames = FALSE) +
@@ -651,17 +840,17 @@ p4 <- gheatmap(p3, fsp_df,
 p5 <- p4 + new_scale_fill()
 
 # add effector heatmap
-p6 <-gheatmap(p5, heatmap_dat, offset=0.07, colnames=FALSE, legend_title="Presence/\nAbsence", color = NULL,  width = 1.5)  +
+p6 <-gheatmap(p5, heatmap_dat, offset=0.13, colnames=FALSE, legend_title="Presence/\nAbsence", color = "grey",  width = 1.75)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
                         low = "white", high = "darkolivegreen",
                         breaks = c("Absent","Present"),
                         na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
   theme(legend.position = "bottom",
-        legend.title = element_text(size = 12),
+        legend.title = element_blank(),
         legend.text = element_text(size = 12),
         legend.box = "horizontal", legend.margin = margin())+
-  guides(shape = guide_legend(override.aes = list(size = 2)))
+  guides(shape = guide_legend(override.aes = list(size = 4)))
 ```
 
     ## Scale for y is already present.
@@ -677,10 +866,399 @@ plot(p6)
 
 ``` r
 # save the output
-ggsave("HeatmapAndPhylo.png", width = 30, height = 10)
+ggsave("HeatmapAndPhylo.png", width = 25, height = 15)
 ```
 
-### Candidate effector distribution in Fo. fsp. cubense
+\#### Summary statistics of candidate effector clusters
+
+I also wanted to look at the distribution of the these clusters in
+numerical terms. How many are shared among all assemblies? How many are
+shared among all Fo. assemblies? How many core CECs are there in
+cubense? etc.
+
+``` r
+# ---- summarise the distribution of candidate effector clusters ---- #
+
+# convert the matrix to a data frame
+heatmap_df <- as.data.frame(heatmap_dat) 
+
+# total number of candidate effector clusters per assembly (as a dataframe). 
+cluster_distib <- enframe(colSums(t(heatmap_df[-1])))
+#rename the value column 
+cluster_distib <- rename(cluster_distib, no._CECs = value)
+# merge the two data frames
+metadata <- merge(metadata, cluster_distib, by.x = "label", by.y = "name", all.x = TRUE)
+
+#subset the metadata ft 
+CEC_metadata <- select(metadata,"species", "species_group", "fsp", "race", "isolate_code","genome_size","no._mimps","no._cand_effs", "no._CECs")
+
+# print it nicely
+knitr::kable(CEC_metadata)
+```
+
+| species         | species_group | fsp          | race            | isolate_code | genome_size | no.\_mimps | no.\_cand_effs | no.\_CECs |
+|:----------------|:--------------|:-------------|:----------------|:-------------|------------:|-----------:|---------------:|----------:|
+| F. graminearum  | Other         | NA           | NA              | PH-1         |        38.0 |          1 |              6 |         6 |
+| F. mindanaoense | Other         | NA           | NA              | PD20-05      |          NA |         NA |             NA |        NA |
+| F. sacchari     | Other         | NA           | NA              | FS66         |        47.5 |          9 |             12 |        12 |
+| F. sacchari     | Other         | NA           | NA              | NRRL_66326   |        42.8 |         10 |             15 |        15 |
+| Fusarium        | Other         | NA           | NA              | S16          |          NA |         NA |             NA |        NA |
+| Fusarium        | Other         | NA           | NA              | S32          |          NA |         NA |             NA |        NA |
+| Fusarium        | Other         | NA           | NA              | S6           |          NA |         NA |             NA |        NA |
+| Fusarium        | Other         | NA           | NA              | SY-2         |        44.2 |          3 |             12 |        12 |
+| F. oxysporum    | F. oxysporum  | endophyte    | np              | Fo47         |        50.4 |         70 |             81 |        53 |
+| F. oxysporum    | F. oxysporum  | from rocket  | NA              | AJ174        |        62.6 |        419 |            169 |        78 |
+| F. oxysporum    | F. oxysporum  | apii         | Race 2          | 207A         |        64.6 |        420 |            388 |       103 |
+| F. oxysporum    | F. oxysporum  | apii         | Race 4          | 274AC        |        67.3 |        217 |            357 |        90 |
+| F. oxysporum    | F. oxysporum  | apii         | Race 4          | AJ498        |        64.6 |        539 |            332 |        90 |
+| F. oxysporum    | F. oxysporum  | apii         | Race 2          | AJ720        |        64.7 |        442 |            399 |       101 |
+| F. oxysporum    | F. oxysporum  | apii         | Race 3          | NRRL38295    |        65.3 |        210 |            328 |        87 |
+| F. oxysporum    | F. oxysporum  | cepae        | Race 2          | FoC_Fus2     |        53.4 |        325 |            359 |        84 |
+| F. oxysporum    | F. oxysporum  | conglutinans | NA              | Fo5176       |        68.0 |        442 |            385 |        86 |
+| F. oxysporum    | F. oxysporum  | coriandrii   | NA              | 3-2          |        65.4 |        478 |            315 |        99 |
+| F. oxysporum    | F. oxysporum  | coriandrii   | NA              | AJ615        |        69.3 |        675 |            603 |       106 |
+| F. oxysporum    | F. oxysporum  | coriandrii   | NA              | GL306        |          NA |         NA |             NA |        NA |
+| F. oxysporum    | F. oxysporum  | cubense      | Race 1          | 160527       |        51.1 |        183 |             95 |        49 |
+| F. oxysporum    | F. oxysporum  | cubense      | Tropical Race 4 | 58           |        48.2 |        165 |            108 |        45 |
+| F. oxysporum    | F. oxysporum  | cubense      | Race 1          | 60           |        48.6 |         39 |             45 |        34 |
+| F. oxysporum    | F. oxysporum  | cubense      | Tropical Race 4 | B2           |        52.9 |        142 |             60 |        42 |
+| F. oxysporum    | F. oxysporum  | cubense      | Tropical Race 4 | C1HIR_9889   |        46.7 |        145 |             70 |        43 |
+| F. oxysporum    | F. oxysporum  | cubense      | Race 1          | N2           |        47.7 |        141 |             63 |        42 |
+| F. oxysporum    | F. oxysporum  | cubense      | Tropical Race 4 | NRRL_54006   |        46.6 |        105 |             70 |        43 |
+| F. oxysporum    | F. oxysporum  | cubense      | Tropical Race 4 | Pers4        |        46.4 |         87 |             62 |        45 |
+| F. oxysporum    | F. oxysporum  | cubense      | Tropical Race 4 | UK0001       |        48.6 |        160 |            127 |        46 |
+| F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44079    |        49.5 |        149 |            107 |        53 |
+| F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44081    |        47.2 |        137 |             45 |        40 |
+| F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44082    |        46.3 |        146 |             50 |        47 |
+| F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44083    |        46.3 |        146 |             50 |        47 |
+| F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44084    |        49.5 |        179 |            104 |        56 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ516        |        68.8 |        522 |            548 |        91 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ520        |        62.2 |        533 |            343 |        87 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ592        |        66.0 |        615 |            482 |        86 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ705        |        66.2 |        614 |            490 |        84 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ718        |        62.1 |        536 |            260 |        77 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ865        |        62.7 |        569 |            296 |        77 |
+| F. oxysporum    | F. oxysporum  | lini         | NA              | 39_C0058     |        59.2 |        263 |            237 |        87 |
+| F. oxysporum    | F. oxysporum  | lycopersici  | Race 2          | 4287         |        56.2 |        332 |            337 |        80 |
+| F. oxysporum    | F. oxysporum  | matthiolae   | NA              | AJ260        |        60.3 |        301 |            209 |        77 |
+| F. oxysporum    | F. oxysporum  | narcissus    | NA              | FON63        |        60.0 |        555 |            251 |        92 |
+| F. oxysporum    | F. oxysporum  | niveum       | np              | 110407-3-1-1 |        49.7 |         52 |             39 |        36 |
+| F. oxysporum    | F. oxysporum  | rapae        | NA              | Tf1208       |        59.8 |        377 |            278 |        82 |
+| F. oxysporum    | F. oxysporum  | vasinfectum  | Race 1          | TF1          |        50.0 |        199 |             91 |        58 |
+
+``` r
+# # summarise it for chapter text
+# summary(CEC_metadata)
+```
+
+``` r
+# ---- candidate effector clusters in Fo ---- #
+
+# extract just the Fo rows from the CEC_metadata
+Fo_CEC_medtadata <- subset(CEC_metadata, !grepl("Other", species_group))
+#summarise
+summary(Fo_CEC_medtadata)
+```
+
+    ##    species          species_group          fsp                race          
+    ##  Length:39          Length:39          Length:39          Length:39         
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##  isolate_code        genome_size      no._mimps   no._cand_effs   
+    ##  Length:39          Min.   :46.30   Min.   : 39   Min.   : 39.00  
+    ##  Class :character   1st Qu.:48.83   1st Qu.:146   1st Qu.: 72.75  
+    ##  Mode  :character   Median :57.70   Median :240   Median :223.00  
+    ##                     Mean   :56.69   Mean   :306   Mean   :227.18  
+    ##                     3rd Qu.:64.60   3rd Qu.:469   3rd Qu.:341.50  
+    ##                     Max.   :69.30   Max.   :675   Max.   :603.00  
+    ##                     NA's   :1       NA's   :1     NA's   :1       
+    ##     no._CECs     
+    ##  Min.   : 34.00  
+    ##  1st Qu.: 46.25  
+    ##  Median : 77.00  
+    ##  Mean   : 69.03  
+    ##  3rd Qu.: 87.00  
+    ##  Max.   :106.00  
+    ##  NA's   :1
+
+``` r
+# ---- candidate effector clusters in fsp ---- #
+
+# extract just the cubense rows from the CEC_metadata
+Foc_CEC_medtadata <- subset(CEC_metadata, grepl("cubense", fsp))
+summary(Foc_CEC_medtadata)
+```
+
+    ##    species          species_group          fsp                race          
+    ##  Length:14          Length:14          Length:14          Length:14         
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##  isolate_code        genome_size      no._mimps     no._cand_effs   
+    ##  Length:14          Min.   :46.30   Min.   : 39.0   Min.   : 45.00  
+    ##  Class :character   1st Qu.:46.62   1st Qu.:138.0   1st Qu.: 52.50  
+    ##  Mode  :character   Median :47.95   Median :145.5   Median : 66.50  
+    ##                     Mean   :48.26   Mean   :137.4   Mean   : 75.43  
+    ##                     3rd Qu.:49.27   3rd Qu.:157.2   3rd Qu.:101.75  
+    ##                     Max.   :52.90   Max.   :183.0   Max.   :127.00  
+    ##     no._CECs    
+    ##  Min.   :34.00  
+    ##  1st Qu.:42.25  
+    ##  Median :45.00  
+    ##  Mean   :45.14  
+    ##  3rd Qu.:47.00  
+    ##  Max.   :56.00
+
+``` r
+# extract just the lactucae rows from the CEC_metadata
+Fola_CEC_medtadata <- subset(CEC_metadata, grepl("lactucae", fsp))
+summary(Fola_CEC_medtadata)
+```
+
+    ##    species          species_group          fsp                race          
+    ##  Length:6           Length:6           Length:6           Length:6          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##  isolate_code        genome_size      no._mimps     no._cand_effs  
+    ##  Length:6           Min.   :62.10   Min.   :522.0   Min.   :260.0  
+    ##  Class :character   1st Qu.:62.33   1st Qu.:533.8   1st Qu.:307.8  
+    ##  Mode  :character   Median :64.35   Median :552.5   Median :412.5  
+    ##                     Mean   :64.67   Mean   :564.8   Mean   :403.2  
+    ##                     3rd Qu.:66.15   3rd Qu.:602.8   3rd Qu.:488.0  
+    ##                     Max.   :68.80   Max.   :615.0   Max.   :548.0  
+    ##     no._CECs    
+    ##  Min.   :77.00  
+    ##  1st Qu.:78.75  
+    ##  Median :85.00  
+    ##  Mean   :83.67  
+    ##  3rd Qu.:86.75  
+    ##  Max.   :91.00
+
+``` r
+# extract just the apii rows from the CEC_metadata
+Foa_CEC_medtadata <- subset(CEC_metadata, grepl("apii", fsp))
+summary(Foa_CEC_medtadata)
+```
+
+    ##    species          species_group          fsp                race          
+    ##  Length:5           Length:5           Length:5           Length:5          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##  isolate_code        genome_size     no._mimps     no._cand_effs  
+    ##  Length:5           Min.   :64.6   Min.   :210.0   Min.   :328.0  
+    ##  Class :character   1st Qu.:64.6   1st Qu.:217.0   1st Qu.:332.0  
+    ##  Mode  :character   Median :64.7   Median :420.0   Median :357.0  
+    ##                     Mean   :65.3   Mean   :365.6   Mean   :360.8  
+    ##                     3rd Qu.:65.3   3rd Qu.:442.0   3rd Qu.:388.0  
+    ##                     Max.   :67.3   Max.   :539.0   Max.   :399.0  
+    ##     no._CECs    
+    ##  Min.   : 87.0  
+    ##  1st Qu.: 90.0  
+    ##  Median : 90.0  
+    ##  Mean   : 94.2  
+    ##  3rd Qu.:101.0  
+    ##  Max.   :103.0
+
+``` r
+# extract just the coriandrii rows from the CEC_metadata
+Foci_CEC_medtadata <- subset(CEC_metadata, grepl("coriandrii", fsp))
+summary(Foci_CEC_medtadata)
+```
+
+    ##    species          species_group          fsp                race          
+    ##  Length:3           Length:3           Length:3           Length:3          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##  isolate_code        genome_size      no._mimps     no._cand_effs
+    ##  Length:3           Min.   :65.40   Min.   :478.0   Min.   :315  
+    ##  Class :character   1st Qu.:66.38   1st Qu.:527.2   1st Qu.:387  
+    ##  Mode  :character   Median :67.35   Median :576.5   Median :459  
+    ##                     Mean   :67.35   Mean   :576.5   Mean   :459  
+    ##                     3rd Qu.:68.33   3rd Qu.:625.8   3rd Qu.:531  
+    ##                     Max.   :69.30   Max.   :675.0   Max.   :603  
+    ##                     NA's   :1       NA's   :1       NA's   :1    
+    ##     no._CECs    
+    ##  Min.   : 99.0  
+    ##  1st Qu.:100.8  
+    ##  Median :102.5  
+    ##  Mean   :102.5  
+    ##  3rd Qu.:104.2  
+    ##  Max.   :106.0  
+    ##  NA's   :1
+
+``` r
+# ---- candidate effector clusters in F. sacchari and SY-2 ---- #
+
+# extract just the cubense rows from the CEC_metadata
+Fs_CEC_medtadata <- subset(CEC_metadata, grepl("FS66|NRRL_66326|SY-2", isolate_code))
+summary(Fs_CEC_medtadata)
+```
+
+    ##    species          species_group          fsp                race          
+    ##  Length:3           Length:3           Length:3           Length:3          
+    ##  Class :character   Class :character   Class :character   Class :character  
+    ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+    ##                                                                             
+    ##                                                                             
+    ##                                                                             
+    ##  isolate_code        genome_size      no._mimps      no._cand_effs 
+    ##  Length:3           Min.   :42.80   Min.   : 3.000   Min.   :12.0  
+    ##  Class :character   1st Qu.:43.50   1st Qu.: 6.000   1st Qu.:12.0  
+    ##  Mode  :character   Median :44.20   Median : 9.000   Median :12.0  
+    ##                     Mean   :44.83   Mean   : 7.333   Mean   :13.0  
+    ##                     3rd Qu.:45.85   3rd Qu.: 9.500   3rd Qu.:13.5  
+    ##                     Max.   :47.50   Max.   :10.000   Max.   :15.0  
+    ##     no._CECs   
+    ##  Min.   :12.0  
+    ##  1st Qu.:12.0  
+    ##  Median :12.0  
+    ##  Mean   :13.0  
+    ##  3rd Qu.:13.5  
+    ##  Max.   :15.0
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in all assemblies  ---- #
+
+# count the number of rows where the column total is >= the number of rows (a shared candidate effector cluster!)
+shared_cluster <- heatmap_df %>%
+  select_if(colSums(heatmap_df) >= nrow(heatmap_df))
+# count the number of columns 
+ncol(shared_cluster)
+```
+
+    ## [1] 1
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in Fo ---- #
+
+# subset only the Fo rows
+heatmap_Fo_only <- subset(heatmap_df, grepl("^Fo", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fo_shared <- heatmap_Fo_only %>%
+  select_if(colSums(heatmap_Fo_only) >= nrow(heatmap_Fo_only))
+# count the number of columns 
+ncol(heatmap_Fo_shared)
+```
+
+    ## [1] 8
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in cubense ---- #
+
+# subset only the Foc rows
+heatmap_Foc_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foc_shared <- heatmap_Foc_only %>%
+  select_if(colSums(heatmap_Foc_only) >= nrow(heatmap_Foc_only))
+# count the number of columns 
+ncol(heatmap_Foc_shared)
+```
+
+    ## [1] 16
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in lactucae ---- #
+
+# subset only the Fola rows
+heatmap_Fola_only <- subset(heatmap_df, grepl("^Fo._fsp._lactucae", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fola_shared <- heatmap_Fola_only %>%
+  select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
+# count the number of columns 
+ncol(heatmap_Fola_shared)
+```
+
+    ## [1] 56
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in apii ---- #
+
+# subset only the Foa rows
+heatmap_Foa_only <- subset(heatmap_df, grepl("^Fo._fsp._apii", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foa_shared <- heatmap_Foa_only %>%
+  select_if(colSums(heatmap_Foa_only) >= nrow(heatmap_Foa_only))
+# count the number of columns 
+ncol(heatmap_Foa_shared)
+```
+
+    ## [1] 54
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in coriandrii ---- #
+
+# subset only the Foci rows
+heatmap_Foci_only <- subset(heatmap_df, grepl("^Fo._fsp._coriandrii", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foci_shared <- heatmap_Foci_only %>%
+  select_if(colSums(heatmap_Foci_only) >= nrow(heatmap_Foci_only))
+# count the number of columns 
+ncol(heatmap_Foci_shared)
+```
+
+    ## [1] 64
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in apii and coridanrii (as they share some hosts) ---- #
+
+# subset only the Foa and Foci rows
+heatmap_Foa_c_only <- subset(heatmap_df, grepl("^Fo._fsp._apii|^Fo._fsp._coriandrii", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foa_c_shared <- heatmap_Foa_c_only %>%
+  select_if(colSums(heatmap_Foa_c_only) >= nrow(heatmap_Foa_c_only))
+# count the number of columns 
+ncol(heatmap_Foa_c_shared)
+```
+
+    ## [1] 48
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
+
+# subset only the Foa and Foci rows
+heatmap_Fs_only <- subset(heatmap_df, grepl("^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fs_shared <- heatmap_Fs_only %>%
+  select_if(colSums(heatmap_Fs_only) >= nrow(heatmap_Fs_only))
+# count the number of columns 
+ncol(heatmap_Fs_shared)
+```
+
+    ## [1] 9
+
+#### Are the ‘core CECs’ in Fs also found in Focub?
+
+``` r
+# ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
+
+# subset only the Foa and Foci rows
+heatmap_banana_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense|^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_banana_shared <- heatmap_banana_only %>%
+  select_if(colSums(heatmap_banana_only) >= nrow(heatmap_banana_only))
+# count the number of columns 
+ncol(heatmap_banana_shared)
+```
+
+    ## [1] 4
+
+### Candidate effector cluster distribution in Fo. fsp. cubense
 
 Now I have my overall heatmap, I want to look at some of the fsp in more
 detail - particularly those for which we have multiple races available.
@@ -781,7 +1359,7 @@ good way to do this, as the R4 and R2 assemblies are from the same
 isolates but diff versions prepared by diff people using different
 methods.
 
-### Candidate effector distribution in Fo. fsp. lactucae and Fo. fsp. apii
+### Candidate effector cluster distribution in Fo. fsp. lactucae and Fo. fsp. apii
 
 ``` r
 # ---- subset metadata ---- #

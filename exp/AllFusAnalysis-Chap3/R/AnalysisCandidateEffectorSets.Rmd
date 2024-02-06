@@ -178,6 +178,25 @@ summary(stats_data$candidate_effectors)
 summary(stats_data$assembly_size)
 ```
 
+I also want to look at specific fsp. to determine if the avernage number of effectors, *mimps*, and genome size is smaller compared to other fsp. To do this, I `subset` the fsp. I am interested in and then use the `summary` function in R. 
+
+```{r subset stats for fsp}
+# ---- subset the fsp of interest ---- #
+# cubense
+foc_stats <- subset(metadata, grepl("Fo._fsp._cubense", label))
+summary(foc_stats)
+# lactucae
+fola_stats <- subset(metadata, grepl("Fo._fsp._lactucae", label))
+summary(fola_stats)
+# apii 
+foa_stats <- subset(metadata, grepl("Fo._fsp._apii", label))
+summary(foa_stats)
+# coriandrii
+foci_stats <- subset(metadata, grepl("Fo._fsp._coriandrii", label)) 
+foci_stats <- foci_stats %>%
+  drop_na(no._mimps)
+summary(foci_stats)
+```
 
 ### Correlation and distribution
 
@@ -335,15 +354,16 @@ stats_plot <- ggplot(aes(x=reorder(ID, mimps_and_candidate_effectors)),   #Creat
   scale_colour_manual(" ", values=c("Assembly Size" = "black"))+
   theme_bw()+
   theme(legend.box="verticle",
-        legend.title = element_blank())+
+        legend.title = element_blank(),
+        legend.position = "bottom")+
   xlab("") +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())+
   theme(axis.text.x = element_text(angle = 90,         #Adjust the text orientation on the x axis
                                    vjust = 0.5, 
                                    hjust=1,
-                                   size = 8))+
-  theme(axis.text = element_text(size = 8))+
+                                   size = 12))+
+  theme(axis.text = element_text(size = 12))+
   scale_y_continuous(name= "Total number of mimps \nand candidate effectors", #Increase ticks on Y axis.
                      breaks = scales::pretty_breaks(n = 10),                     #Create regular breaks in the Y axis. 
                      sec.axis = sec_axis( trans=~.*scale_right,                   #Insert second Y axis for the assembly size. Calculated using the right-hand scale.   
@@ -353,7 +373,7 @@ stats_plot <- ggplot(aes(x=reorder(ID, mimps_and_candidate_effectors)),   #Creat
 # print the plot
 plot(stats_plot)
 #Prepare png of file 
-ggsave("StatsOverview.png", width = 15, height = 10)
+ggsave("StatsOverview.png", width = 10, height = 10)
 
 ```
 ### Additional statsistics 
@@ -382,10 +402,9 @@ race_plot_data <- select(metadata,"species", "species_group", "fsp", "race" ,"is
 
 
 # ---- subset metadata ---- #
-# extract only the fsp we are interested in 
-race_plot_data_subset <- subset(race_plot_data, grepl("lactucae|apii|cubense", fsp)) %>% 
+# extract only the fsp we are interested in and drop isolates which don't have a race classification
+race_plot_data_subset <- subset(race_plot_data, grepl("lactucae|apii|cubense", fsp)) %>%
   drop_na(race)
-
 
 # ---- funky cheats to lable the facet plot nicely --- #
 
@@ -402,18 +421,65 @@ mimpsandcandeffs <- ggplot(race_plot_data_subset, aes(x=race, y=mimps_and_candid
   geom_boxplot(aes(fill = Legend)) +
   facet_wrap(~ fsp, labeller = labeller(Legend = new_labels_y, fsp = new_labels_x), scales = "free_x") +  # split the plot by fsp and then mimps/candidate effectors
   labs(x = "Race", 
-       y = "Count") +
+       y = "Total number of mimps \nand candidate effectors") +
   scale_fill_manual(values = c("candidate_effectors" = "darkolivegreen", "mimps" = "#DDE0DA"), label=c("mimps", "candidate effectors")) +
+  theme_bw() +
   theme(strip.text.y = element_blank(),  # remove the side names as we have this shown in colour now. 
-        panel.grid.major = element_line(), # put the lines back in 
+        panel.grid.major = element_blank(), # put the lines back in 
         legend.position = "bottom", 
-        legend.title = element_blank())
+        legend.title = element_blank()) 
+
 #plot it 
 plot(mimpsandcandeffs)
 
 #save the plot
-ggsave("MimpsAndCandEffs_CubenseOnly.png", width = 20, height = 10)
+ggsave("MimpsAndCandEffs_FspOfInterest.png", width = 10, height = 10)
 
+
+```
+
+I want to put some values to this to dicuss in the text of my thesis.
+
+```{r race stats in fsp}
+# ---- subset the fsp of interest ---- #
+# cubense
+foc_stats_sum <- foc_stats %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(label),
+            mean_mimp = mean(no._mimps),
+            min_mimp = min(no._mimps),
+            max_mimp= max(no._mimps),
+            mean_eff = mean(no._cand_effs),
+            min_eff = min(no._cand_effs),
+            max_eff = max(no._cand_effs),
+            sum_eff = sum(no._cand_effs))
+# lactucae
+fola_stats_sum <- fola_stats %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(label),
+            mean_mimp = mean(no._mimps),
+            min_mimp = min(no._mimps),
+            max_mimp= max(no._mimps),
+            mean_eff = mean(no._cand_effs),
+            min_eff = min(no._cand_effs),
+            max_eff = max(no._cand_effs),
+            sum_eff = sum(no._cand_effs))
+# apii 
+foa_stats_sum <- foa_stats  %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(label),
+            mean_mimp = mean(no._mimps),
+            min_mimp = min(no._mimps),
+            max_mimp= max(no._mimps),
+            mean_eff = mean(no._cand_effs),
+            min_eff = min(no._cand_effs),
+            max_eff = max(no._cand_effs),
+            sum_eff = sum(no._cand_effs))
+
+# print it nicely
+knitr::kable(foc_stats_sum)
+knitr::kable(fola_stats_sum)
+knitr::kable(foa_stats_sum)
 
 ```
 
@@ -447,13 +513,13 @@ heatmap_dat <- cluster_matrix(binary_matrix, dim = 'col', method ="ward.D2")
 
 Next, in theory, I add the heatmap to the tree already built... but I cant get the offsets to align consistently and it overlaps if i just add heatmap_dat to p4, so I have to rebuild p4.
 
-```{r final heatmap, fig.height= 10, fig.width= 30}
+```{r final heatmap, fig.height= 15, fig.width= 25}
 # ---- Build the full figure ---- #
 p2 <- p +  
   geom_treescale(x = 0, y = 1, width = 0.004) + 
-  geom_tiplab(aes(label = full_name), offset = 0.001) +
-  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.028, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "black", offset = 0.047, linetype = "blank", geom = "text", align = TRUE)+
+  geom_tiplab(aes(label = full_name), offset = 0.0015) +
+  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.05, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = race), color = "black", offset = 0.088, linetype = "blank", geom = "text", align = TRUE)+
   geom_tippoint(aes(shape = source), size = 3) +
   geom_rootedge() +
   theme(legend.position = "bottom")
@@ -462,7 +528,7 @@ p2 <- p +
 p3 <- p2 + new_scale_fill()
 # add race data
 p4 <- gheatmap(p3, fsp_df,
-               offset = 0.02, 
+               offset = 0.04, 
                width = 0.03,
                color = "black",
                colnames = FALSE) +
@@ -478,26 +544,192 @@ p4 <- gheatmap(p3, fsp_df,
 p5 <- p4 + new_scale_fill()
 
 # add effector heatmap
-p6 <-gheatmap(p5, heatmap_dat, offset=0.07, colnames=FALSE, legend_title="Presence/\nAbsence", color = NULL,  width = 1.5)  +
+p6 <-gheatmap(p5, heatmap_dat, offset=0.13, colnames=FALSE, legend_title="Presence/\nAbsence", color = "grey",  width = 1.75)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
                         low = "white", high = "darkolivegreen",
                         breaks = c("Absent","Present"),
                         na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
   theme(legend.position = "bottom",
-        legend.title = element_text(size = 12),
+        legend.title = element_blank(),
         legend.text = element_text(size = 12),
         legend.box = "horizontal", legend.margin = margin())+
-  guides(shape = guide_legend(override.aes = list(size = 2)))
+  guides(shape = guide_legend(override.aes = list(size = 4)))
 
 plot(p6)
 
 # save the output
-ggsave("HeatmapAndPhylo.png", width = 30, height = 10)
+ggsave("HeatmapAndPhylo.png", width = 25, height = 15)
 
 ```
 
-### Candidate effector distribution in Fo. fsp. cubense
+#### Summary statistics of candidate effector clusters
+
+I also wanted to look at the distribution of the these clusters in numerical terms. How many are shared among all assemblies? How many are shared among all Fo. assemblies? How many core CECs are there in cubense? etc. 
+
+```{r summary stats of effector clusters}
+
+# ---- summarise the distribution of candidate effector clusters ---- #
+
+# convert the matrix to a data frame
+heatmap_df <- as.data.frame(heatmap_dat) 
+
+# total number of candidate effector clusters per assembly (as a dataframe). 
+cluster_distib <- enframe(colSums(t(heatmap_df[-1])))
+#rename the value column 
+cluster_distib <- rename(cluster_distib, no._CECs = value)
+# merge the two data frames
+metadata <- merge(metadata, cluster_distib, by.x = "label", by.y = "name", all.x = TRUE)
+
+#subset the metadata ft 
+CEC_metadata <- select(metadata,"species", "species_group", "fsp", "race", "isolate_code","genome_size","no._mimps","no._cand_effs", "no._CECs")
+
+# print it nicely
+knitr::kable(CEC_metadata)
+
+# # summarise it for chapter text
+# summary(CEC_metadata)
+
+```
+
+```{r stats of effector clusters per fsp}
+
+# ---- candidate effector clusters in Fo ---- #
+
+# extract just the Fo rows from the CEC_metadata
+Fo_CEC_medtadata <- subset(CEC_metadata, !grepl("Other", species_group))
+#summarise
+summary(Fo_CEC_medtadata)
+
+# ---- candidate effector clusters in fsp ---- #
+
+# extract just the cubense rows from the CEC_metadata
+Foc_CEC_medtadata <- subset(CEC_metadata, grepl("cubense", fsp))
+summary(Foc_CEC_medtadata)
+
+# extract just the lactucae rows from the CEC_metadata
+Fola_CEC_medtadata <- subset(CEC_metadata, grepl("lactucae", fsp))
+summary(Fola_CEC_medtadata)
+
+
+# extract just the apii rows from the CEC_metadata
+Foa_CEC_medtadata <- subset(CEC_metadata, grepl("apii", fsp))
+summary(Foa_CEC_medtadata)
+
+
+# extract just the coriandrii rows from the CEC_metadata
+Foci_CEC_medtadata <- subset(CEC_metadata, grepl("coriandrii", fsp))
+summary(Foci_CEC_medtadata)
+
+
+# ---- candidate effector clusters in F. sacchari and SY-2 ---- #
+
+# extract just the cubense rows from the CEC_metadata
+Fs_CEC_medtadata <- subset(CEC_metadata, grepl("FS66|NRRL_66326|SY-2", isolate_code))
+summary(Fs_CEC_medtadata)
+
+
+```
+
+```{r stats of core effector clusters}
+# ---- summarise the distribution of candidate effector clusters in all assemblies  ---- #
+
+# count the number of rows where the column total is >= the number of rows (a shared candidate effector cluster!)
+shared_cluster <- heatmap_df %>%
+  select_if(colSums(heatmap_df) >= nrow(heatmap_df))
+# count the number of columns 
+ncol(shared_cluster)
+
+# ---- summarise the distribution of candidate effector clusters in Fo ---- #
+
+# subset only the Fo rows
+heatmap_Fo_only <- subset(heatmap_df, grepl("^Fo", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fo_shared <- heatmap_Fo_only %>%
+  select_if(colSums(heatmap_Fo_only) >= nrow(heatmap_Fo_only))
+# count the number of columns 
+ncol(heatmap_Fo_shared)
+
+# ---- summarise the distribution of candidate effector clusters in cubense ---- #
+
+# subset only the Foc rows
+heatmap_Foc_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foc_shared <- heatmap_Foc_only %>%
+  select_if(colSums(heatmap_Foc_only) >= nrow(heatmap_Foc_only))
+# count the number of columns 
+ncol(heatmap_Foc_shared)
+
+# ---- summarise the distribution of candidate effector clusters in lactucae ---- #
+
+# subset only the Fola rows
+heatmap_Fola_only <- subset(heatmap_df, grepl("^Fo._fsp._lactucae", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fola_shared <- heatmap_Fola_only %>%
+  select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
+# count the number of columns 
+ncol(heatmap_Fola_shared)
+
+# ---- summarise the distribution of candidate effector clusters in apii ---- #
+
+# subset only the Foa rows
+heatmap_Foa_only <- subset(heatmap_df, grepl("^Fo._fsp._apii", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foa_shared <- heatmap_Foa_only %>%
+  select_if(colSums(heatmap_Foa_only) >= nrow(heatmap_Foa_only))
+# count the number of columns 
+ncol(heatmap_Foa_shared)
+
+# ---- summarise the distribution of candidate effector clusters in coriandrii ---- #
+
+# subset only the Foci rows
+heatmap_Foci_only <- subset(heatmap_df, grepl("^Fo._fsp._coriandrii", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foci_shared <- heatmap_Foci_only %>%
+  select_if(colSums(heatmap_Foci_only) >= nrow(heatmap_Foci_only))
+# count the number of columns 
+ncol(heatmap_Foci_shared)
+
+# ---- summarise the distribution of candidate effector clusters in apii and coridanrii (as they share some hosts) ---- #
+
+# subset only the Foa and Foci rows
+heatmap_Foa_c_only <- subset(heatmap_df, grepl("^Fo._fsp._apii|^Fo._fsp._coriandrii", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foa_c_shared <- heatmap_Foa_c_only %>%
+  select_if(colSums(heatmap_Foa_c_only) >= nrow(heatmap_Foa_c_only))
+# count the number of columns 
+ncol(heatmap_Foa_c_shared)
+
+
+# ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
+
+# subset only the Foa and Foci rows
+heatmap_Fs_only <- subset(heatmap_df, grepl("^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fs_shared <- heatmap_Fs_only %>%
+  select_if(colSums(heatmap_Fs_only) >= nrow(heatmap_Fs_only))
+# count the number of columns 
+ncol(heatmap_Fs_shared)
+
+```
+
+#### Are the 'core CECs' in Fs also found in Focub? 
+
+
+```{r banana pathogen core}
+# ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
+
+# subset only the Foa and Foci rows
+heatmap_banana_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense|^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+# count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_banana_shared <- heatmap_banana_only %>%
+  select_if(colSums(heatmap_banana_only) >= nrow(heatmap_banana_only))
+# count the number of columns 
+ncol(heatmap_banana_shared)
+
+```
+
+### Candidate effector cluster distribution in Fo. fsp. cubense
 
 Now I have my overall heatmap, I want to look at some of the fsp in more detail - particularly those for which we have multiple races available. I subset my metadata, searched for all caseses that did not match the regex "Fo._fsp._cubense" and dropped them from the tree using the `drop.tip` function. I the reconstructed my tree using just the Foc tef phylo and foc effector profiles. 
 
@@ -575,7 +807,7 @@ I think it is interesting, though we cannot do any really significant stats on t
 
 I was expecting to see a fairly similar number of mimps and candidate effectors among the TR4 isolates, as they are from a monophyletic clade in tef and rbp2 phylos, but number of candidates varies. I am thinking it may be due to assembly quality too? Looking at the Foa isolates is a good way to do this, as the R4 and R2 assemblies are from the same isolates but diff versions prepared by diff people using different methods. 
 
-### Candidate effector distribution in Fo. fsp. lactucae and Fo. fsp. apii
+### Candidate effector cluster distribution in Fo. fsp. lactucae and Fo. fsp. apii
 
 ```{r coriandrii and apii effector distib, fig.height= 10, fig.width= 20}
 
