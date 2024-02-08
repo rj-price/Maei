@@ -80,8 +80,8 @@ race).
 p2 <- p +  
   geom_treescale(x = 0, y = 1, width = 0.004) + 
   geom_tiplab(aes(label = full_name)) +
-  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.015, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "black", offset = 0.024, linetype = "blank", geom = "text", align = TRUE)+
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.015, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.024, linetype = "blank", geom = "text", align = TRUE)+
   geom_tippoint(aes(shape = source)) +
   geom_rootedge() +
   theme(legend.position = "bottom")
@@ -92,10 +92,10 @@ p3 <- p2 + new_scale_fill()
 p4 <- gheatmap(p3, fsp_df,
                offset = 0.008, 
                width = 0.03,
-               color = "black",
+               color = "grey20",
                colnames = FALSE) +
   scale_fill_manual(name = "Fsp",
-                    values = c("blue","purple","goldenrod4","grey90","gold","brown", "lightpink","darkolivegreen3", "black", "tomato", "lavender", "tan", "palegreen4", "coral", "yellow"), na.value = "grey") +
+                    values = c("blue","purple","goldenrod4","grey90","gold","brown", "lightpink","darkolivegreen3", "grey20", "tomato", "lavender", "tan", "palegreen4", "coral", "yellow"), na.value = "grey") +
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12),
@@ -363,17 +363,17 @@ correlation test to perform.
 # ---- Build the histograms ---- #
 # visualise the mimp distribution
 mimps_histo <- ggplot(stats_data, aes(x = mimps)) +
-  geom_histogram(fill = "#0c4c8a", colour = "black" ) +
+  geom_histogram(fill = "#0c4c8a", colour = "grey20" ) +
   theme_bw()
 
 # visualise the mimp distribution
 cands_histo <- ggplot(stats_data, aes(x = candidate_effectors)) +
-  geom_histogram(fill = "#0c4c8a", colour = "black" ) +
+  geom_histogram(fill = "#0c4c8a", colour = "grey20" ) +
   theme_bw()
 
 # visualise the mimp distribution
 size_histo <- ggplot(stats_data, aes(x = assembly_size)) +
-  geom_histogram(fill = "#0c4c8a", colour = "black" ) +
+  geom_histogram(fill = "#0c4c8a", colour = "grey20" ) +
   theme_bw()
 ```
 
@@ -390,7 +390,7 @@ are linearly related.
 effectors_v_mimps_relat <- ggplot(stats_data) +
   aes(x = candidate_effectors, y = mimps) +
   geom_point(colour = "#0c4c8a") +
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  geom_smooth(method = "lm", se = FALSE, color = "grey20") +
   theme_bw()
 
 #Correlation between  the total number of effectors and Assembly Size?
@@ -398,7 +398,7 @@ effectors_v_mimps_relat <- ggplot(stats_data) +
 effectors_v_assembly_size_relat <- ggplot(stats_data) +
   aes(x = candidate_effectors, y = assembly_size) +
   geom_point(colour = "#0c4c8a") +
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  geom_smooth(method = "lm", se = FALSE, color = "grey20") +
   theme_bw()
 
 #Correlation between the total number of mimps and Assembly Size?
@@ -406,7 +406,7 @@ effectors_v_assembly_size_relat <- ggplot(stats_data) +
 mimps_v_assembly_size_relat <- ggplot(stats_data) +
   aes(x = mimps, y = assembly_size) +
   geom_point(colour = "#0c4c8a") +
-  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  geom_smooth(method = "lm", se = FALSE, color = "grey20") +
   theme_bw()
 ```
 
@@ -574,7 +574,7 @@ stats_plot <- ggplot(aes(x=reorder(ID, mimps_and_candidate_effectors)),   #Creat
                data = stats_plot_data)+  
   geom_bar(aes(y=mimps_and_candidate_effectors,                  #Plot the total number of mimps and effectors 
                fill = Legend),
-           colour="black",
+           colour="grey20",
            position= 'dodge',                          #Ensure the bars are not stacked. 
            stat='identity')+                           #Add the mimp or predicted effector content. 
   scale_fill_manual("Legend", values=c("candidate_effectors" = "darkolivegreen", "mimps" = "#DDE0DA"), label=c("mimps", "candidate effectors"))+ #for some reason the labels have to be written the other way round...?
@@ -584,8 +584,9 @@ stats_plot <- ggplot(aes(x=reorder(ID, mimps_and_candidate_effectors)),   #Creat
              switch = "x")+                            # Move the facet labels to the bottom.
   geom_point(aes(y=assembly_size /scale_right,         #Plot assemble size over the top of the bar chart.
                  colour = "Assembly Size",             #Add assembly size to the legend. 
-                 group = 1))+ 
-  scale_colour_manual(" ", values=c("Assembly Size" = "black"))+
+                 group = 1), 
+             size = 3)+ 
+  scale_colour_manual(" ", values=c("Assembly Size" = "grey50"))+
   theme_bw()+
   theme(legend.box="verticle",
         legend.title = element_blank(),
@@ -807,8 +808,8 @@ heatmap_dat to p4, so I have to rebuild p4.
 p2 <- p +  
   geom_treescale(x = 0, y = 1, width = 0.004) + 
   geom_tiplab(aes(label = full_name), offset = 0.0015) +
-  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.05, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "black", offset = 0.088, linetype = "blank", geom = "text", align = TRUE)+
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.05, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.088, linetype = "blank", geom = "text", align = TRUE)+
   geom_tippoint(aes(shape = source), size = 3) +
   geom_rootedge() +
   theme(legend.position = "bottom")
@@ -819,10 +820,10 @@ p3 <- p2 + new_scale_fill()
 p4 <- gheatmap(p3, fsp_df,
                offset = 0.04, 
                width = 0.03,
-               color = "black",
+               color = "grey20",
                colnames = FALSE) +
   scale_fill_manual(name = "Fsp",
-                    values = c("blue","purple","goldenrod4","grey90","gold","brown", "lightpink","darkolivegreen3", "black", "tomato", "lavender", "tan", "palegreen4", "coral", "yellow"), na.value = "grey") +
+                    values = c("blue","purple","goldenrod4","grey90","gold","brown", "lightpink","darkolivegreen3", "grey20", "tomato", "lavender", "tan", "palegreen4", "coral", "yellow"), na.value = "grey") +
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12),
@@ -842,7 +843,7 @@ p5 <- p4 + new_scale_fill()
 # add effector heatmap
 p6 <-gheatmap(p5, heatmap_dat, offset=0.13, colnames=FALSE, legend_title="Presence/\nAbsence", color = "grey",  width = 1.75)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "darkolivegreen",
+                        low = "white", high = "black",
                         breaks = c("Absent","Present"),
                         na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
@@ -869,7 +870,7 @@ plot(p6)
 ggsave("HeatmapAndPhylo.png", width = 25, height = 15)
 ```
 
-\#### Summary statistics of candidate effector clusters
+\### Summary statistics of candidate effector clusters
 
 I also wanted to look at the distribution of the these clusters in
 numerical terms. How many are shared among all assemblies? How many are
@@ -882,7 +883,10 @@ cubense? etc.
 # convert the matrix to a data frame
 heatmap_df <- as.data.frame(heatmap_dat) 
 
-# total number of candidate effector clusters per assembly (as a dataframe). 
+# count the number of columns to get the total number of CECs
+total_CECs <- ncol(heatmap_df)
+
+# total number of candidate effector clusters per assembly (as a dataframe)
 cluster_distib <- enframe(colSums(t(heatmap_df[-1])))
 #rename the value column 
 cluster_distib <- rename(cluster_distib, no._CECs = value)
@@ -1258,6 +1262,61 @@ ncol(heatmap_banana_shared)
 
     ## [1] 4
 
+### Distribution of CECs among races
+
+``` r
+# ---- subset the fsp of interest ---- #
+# cubense
+foc_CEC_stats_sum <- Foc_CEC_medtadata %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(isolate_code),
+            mean_CEC = mean(no._CECs),
+            min_CEC = min(no._CECs),
+            max_CEC = max(no._CECs))
+# lactucae
+fola_CEC_stats_sum <- Fola_CEC_medtadata %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(isolate_code),
+            mean_CEC = mean(no._CECs),
+            min_CEC = min(no._CECs),
+            max_CEC= max(no._CECs))
+# apii 
+foa_CEC_stats_sum <- Foa_CEC_medtadata  %>%
+  group_by(race) %>%
+  summarize(count = n_distinct(isolate_code),
+            mean_CEC = mean(no._CECs),
+            min_CEC = min(no._CECs),
+            max_CEC = max(no._CECs))
+
+# print it nicely
+knitr::kable(foc_CEC_stats_sum)
+```
+
+| race            | count | mean_CEC | min_CEC | max_CEC |
+|:----------------|------:|---------:|--------:|--------:|
+| Race 1          |     3 | 41.66667 |      34 |      49 |
+| Tropical Race 4 |     6 | 44.00000 |      42 |      46 |
+| NA              |     5 | 48.60000 |      40 |      56 |
+
+``` r
+knitr::kable(fola_CEC_stats_sum)
+```
+
+| race   | count | mean_CEC | min_CEC | max_CEC |
+|:-------|------:|---------:|--------:|--------:|
+| Race 1 |     3 | 80.33333 |      77 |      87 |
+| Race 4 |     3 | 87.00000 |      84 |      91 |
+
+``` r
+knitr::kable(foa_CEC_stats_sum)
+```
+
+| race   | count | mean_CEC | min_CEC | max_CEC |
+|:-------|------:|---------:|--------:|--------:|
+| Race 2 |     2 |      102 |     101 |     103 |
+| Race 3 |     1 |       87 |      87 |      87 |
+| Race 4 |     2 |       90 |      90 |      90 |
+
 ### Candidate effector cluster distribution in Fo. fsp. cubense
 
 Now I have my overall heatmap, I want to look at some of the fsp in more
@@ -1298,7 +1357,7 @@ foc_tree <- ggtree(tree_reduced, ladderize = T ) %<+% metadata
 # now make the tree pretty 
 foc_tree_2 <- foc_tree +  
   #geom_tiplab(aes(label = full_name), offset = 0.00001) +
-  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.0003, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0003, linetype = "blank", geom = "text", align = TRUE) +
   geom_tiplab(aes(label = race), offset = 0.0038, linetype = "blank", geom = "text", align = TRUE)+
   geom_tippoint(aes(shape = source), size = 3) +
   geom_rootedge() +
@@ -1309,7 +1368,7 @@ foc_tree_3 <- foc_tree_2 + new_scale_fill()
 # add race data
 foc_tree_4 <- gheatmap(foc_tree_3, foc_heat_df, offset=0.008, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "darkolivegreen",
+                        low = "white", high = "black",
                         breaks = c("Absent","Present"),
                         na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
@@ -1392,8 +1451,8 @@ foa_c_tree <- ggtree(tree_reduced, ladderize = T ) %<+% metadata
 # now make the tree pretty 
 foa_c_tree_2 <- foa_c_tree +  
   #geom_tiplab(aes(label = full_name), offset = 0.00001) +
-  geom_tiplab(aes(label = fsp), color = "black", offset = 0.0003, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.002, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = fsp), color = "grey20", offset = 0.0003, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.002, linetype = "blank", geom = "text", align = TRUE) +
   geom_tiplab(aes(label = race), offset = 0.0042, linetype = "blank", geom = "text", align = TRUE)+
   geom_tippoint(aes(shape = source), size = 3) +
   geom_rootedge() +
@@ -1404,7 +1463,7 @@ foa_c_tree_3 <- foa_c_tree_2 + new_scale_fill()
 # add race data
 foa_c_tree_4 <- gheatmap(foa_c_tree_3, foa_c_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "darkolivegreen",
+                        low = "white", high = "black",
                         breaks = c("Absent","Present"),
                         na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
@@ -1477,7 +1536,7 @@ fola_tree <- ggtree(tree_reduced, ladderize = T ) %<+% metadata
 # now make the tree pretty 
 fola_tree_2 <- fola_tree +  
   geom_tiplab(aes(label = fsp), offset = 0.0003) +
-  geom_tiplab(aes(label = isolate_code), color = "black", offset = 0.002, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.002, linetype = "blank", geom = "text", align = TRUE) +
   geom_tiplab(aes(label = race), offset = 0.0042, linetype = "blank", geom = "text", align = TRUE)+
   geom_tippoint(aes(shape = source), size = 3) +
   geom_rootedge() +
@@ -1489,7 +1548,7 @@ fola_tree_3 <- fola_tree_2 + new_scale_fill()
 # add race data
 fola_tree_4 <- gheatmap(fola_tree_3, fola_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "darkolivegreen",
+                        low = "white", high = "black",
                         breaks = c("Absent","Present"),
                         na.value = "grey") +
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1)) +
