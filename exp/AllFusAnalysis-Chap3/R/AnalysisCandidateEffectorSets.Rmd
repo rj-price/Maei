@@ -1,7 +1,6 @@
 ---
 title: "Analysis of Candidate Effectors"
 output: github_document
-toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -491,12 +490,15 @@ knitr::kable(foa_stats_sum)
 
 ## Candidate effector distribution
 
-Now I have an understanding of the effector distribution and the phylogeny, I combined the phylogenies and effector profiles to generate a heat map. For this, I can use the tree (p4) already generated and add the heatmap data I loaded initially (data).
+Now I have an understanding of the effector distribution and the phylogeny, I combined the phylogenies and effector profiles to generate a binary presence/absence heatmap. 
 
-Now, I need to prepare the heatmap data. As we are looking at clustered (0.65% ID, cd-hit (v...)) and filtered sequences (SignalP (v5.06) and EffectorP (v2.0.1) extracted from BLAST hits, the total number of candidate effectors per cluster per isolate varies, but I want to just look at Presence/Absence. In order to do this, I converted the heatmap data matrix to a binary data frame. 
+### Summary statistics of candidate effector clusters
+
+As we are looking at clustered (0.65% ID, cd-hit (v...)) and filtered sequences (SignalP (v5.06) and EffectorP (v2.0.1) extracted from BLAST hits, the total number of candidate effectors per cluster per isolate varies, but I want to just look at Presence/Absence. In order to do this, I converted the heatmap data matrix to a binary data frame. However, I don't just want to work with the binary data, so I'll make a second df I can use later.
 
 ```{r heatmap data prep}
-# ---- Prep the heatmap data ---- #
+
+# ---- prep the binary heatmap data ---- #
 # remove the row names temporarily 
 rownames_mat<- data[,1]
 mat_data<- as.matrix(data[,-1])
@@ -505,34 +507,31 @@ binary_matrix <- as.matrix(mat_data)
 binary_matrix[binary_matrix > 0] <- 1
 #put rownames back
 rownames(binary_matrix)<-rownames_mat
+
+# ---- prep the heatmap data ---- #
+# make the CEC data a matric
+CEC_matrix<- as.matrix(data)
+# make it a df 
+CEC_df <- as.data.frame(CEC_matrix)
+
+metadata
+
 ```
 
-I clustered the data in the binary data matrix, so that it will be ordered  when I visualise the candidate effector heatmap.
-
-```{r dendrogram of effector clusters, fig.height= 5, fig.width= 20}
-# ---- Cluster the heatmap data ---- #
-# normalisiation is mandatory for clustering, but as my data is binary - i did not normalise. 
-# Compute hierarchical clustering of columns
-heatmap_dat <- cluster_matrix(binary_matrix, method ="ward.D2")
-
-```
-
-### Summary statistics of candidate effector clusters
 
 First, I wanted to look at the distribution of the these clusters in numerical terms. How many are shared among all assemblies? How many are shared among all Fo. assemblies? How many core CECs are there in cubense? etc. 
 
 ```{r summary stats of effector clusters}
 
 # ---- summarise the distribution of candidate effector clusters ---- #
-
 # convert the matrix to a data frame
-heatmap_df <- as.data.frame(heatmap_dat) 
+CEC_binary_df <- as.data.frame(binary_matrix)
 
-# count the number of columns to get the total number of CECs
-total_CECs <- ncol(heatmap_df)
+# count the number of columns (minus the label column) to get the total number of CECs
+total_CECs <- ncol(CEC_binary_df)
 
 # total number of candidate effector clusters per assembly (as a dataframe)
-cluster_distib <- enframe(colSums(t(heatmap_df[-1])))
+cluster_distib <- enframe(colSums(t(CEC_binary_df[-1])))
 #rename the value column 
 cluster_distib <- dplyr::rename(cluster_distib, no._CECs = value)
 # merge the two data frames
@@ -548,6 +547,75 @@ knitr::kable(CEC_metadata)
 # summary(CEC_metadata)
 
 ```
+
+Now I want to look at the size of the CECs, how many sequences are there in each? Do any fsp have unique CECs which are expanded?
+
+```{r CEC sizes and distribution by fsp}
+
+# ---- Prep the heatmap data ---- #
+# join the metadata in to make filtering and manipulation later easier
+ CEC_df_all <- left_join(metadata, CEC_df, by = c("label" = "Isolate"))
+
+# ---- group by fsp ---- #
+
+# calculate the total number of CEs in a given CEC per fsp.
+CEC_sizes <- CEC_df_all %>% 
+  group_by(full_name) %>%
+  mutate(across(starts_with("Cluster"),
+              ~ as.numeric(as.character(.)))) %>% 
+  summarize(across(starts_with("Cluster"), sum, na.rm = TRUE))
+
+# use the CEC_sizes output to find the range for each fsp (highest number of CEs in a CEC and lowest number of CEs in a CEC, not counting 0)
+CEC_ranges <- CEC_sizes %>%
+  pivot_longer(cols = starts_with("Cluster"), names_to = "column") %>%
+  filter(value != 0) %>%
+  group_by(full_name) %>%
+  summarise(num_highest = sum(value == max(value)), #  report the number of clusters with the max value, just incase it is more than one.
+            highest = if_else(num_highest == 1, first(column[which.max(value)]), NA_character_), #  report the highest cluster unless it is > 1. 
+            highest_value = max(value),
+            num_lowest = sum(value == min(value)), #  report the number of clusters with the min value, becuase it is likely to be more than one.
+            lowest = if_else(num_lowest == 1, first(column[which.min(value)]), NA_character_), #  report the lowest cluster unless it is > 1. 
+            lowest_value = min(value))
+
+# print it nicely
+knitr::kable(CEC_ranges)
+
+```
+
+Now i want to see what clusters are largest and smallest overall.
+
+```{r CEC sizes and distribution}
+
+# now calculate the largest clusters
+CEC_overall_sizes <- CEC_sizes %>%
+  pivot_longer(cols = -full_name, names_to = "column") %>%
+  filter(value != 0) %>%
+  group_by(column) %>%
+  summarise(total_value = sum(value),
+            num_values = sum(value != 0)) %>%
+  ungroup() %>%
+  summarise(largest_column = column[which.max(total_value)],
+            largest_total = max(total_value),
+            num_largest = sum(total_value == max(total_value)),
+            smallest_total = min(total_value),
+            num_smallest = sum(total_value == min(total_value)))
+            
+# print it nicely
+knitr::kable(CEC_overall_sizes)
+
+```
+
+
+I clustered the data in the binary data matrix, so that it will be ordered  when I visualise the candidate effector heatmap.
+
+```{r dendrogram of effector clusters, fig.height= 5, fig.width= 20}
+# ---- Cluster the heatmap data ---- #
+# normalisiation is mandatory for clustering, but as my data is binary - i did not normalise. 
+# Compute hierarchical clustering of columns
+heatmap_dat <- cluster_matrix(binary_matrix, method ="ward.D2")
+
+```
+
 
 ### Build heatmap of CECs
 
