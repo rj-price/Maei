@@ -1,8 +1,6 @@
 Analysis of Candidate Effectors
 ================
 
-true
-
 ## Data set
 
 Candidate effectors were generated as part of the Third Chapter of my
@@ -769,18 +767,20 @@ knitr::kable(foa_stats_sum)
 
 Now I have an understanding of the effector distribution and the
 phylogeny, I combined the phylogenies and effector profiles to generate
-a heat map. For this, I can use the tree (p4) already generated and add
-the heatmap data I loaded initially (data).
+a binary presence/absence heatmap.
 
-Now, I need to prepare the heatmap data. As we are looking at clustered
-(0.65% ID, cd-hit (v…)) and filtered sequences (SignalP (v5.06) and
-EffectorP (v2.0.1) extracted from BLAST hits, the total number of
-candidate effectors per cluster per isolate varies, but I want to just
-look at Presence/Absence. In order to do this, I converted the heatmap
-data matrix to a binary data frame.
+### Summary statistics of candidate effector clusters
+
+As we are looking at clustered (0.65% ID, cd-hit (v…)) and filtered
+sequences (SignalP (v5.06) and EffectorP (v2.0.1) extracted from BLAST
+hits, the total number of candidate effectors per cluster per isolate
+varies, but I want to just look at Presence/Absence. In order to do
+this, I converted the heatmap data matrix to a binary data frame.
+However, I don’t just want to work with the binary data, so I’ll make a
+second df I can use later.
 
 ``` r
-# ---- Prep the heatmap data ---- #
+# ---- prep the binary heatmap data ---- #
 # remove the row names temporarily 
 rownames_mat<- data[,1]
 mat_data<- as.matrix(data[,-1])
@@ -789,36 +789,30 @@ binary_matrix <- as.matrix(mat_data)
 binary_matrix[binary_matrix > 0] <- 1
 #put rownames back
 rownames(binary_matrix)<-rownames_mat
+
+# ---- prep the heatmap data ---- #
+# make the CEC data a matric
+CEC_matrix<- as.matrix(data)
+# make it a df 
+CEC_df <- as.data.frame(CEC_matrix)
 ```
-
-I clustered the data in the binary data matrix, so that it will be
-ordered when I visualise the candidate effector heatmap.
-
-``` r
-# ---- Cluster the heatmap data ---- #
-# normalisiation is mandatory for clustering, but as my data is binary - i did not normalise. 
-# Compute hierarchical clustering of columns
-heatmap_dat <- cluster_matrix(binary_matrix, method ="ward.D2")
-```
-
-### Summary statistics of candidate effector clusters
 
 First, I wanted to look at the distribution of the these clusters in
-numerical terms. How many are shared among all assemblies? How many are
-shared among all Fo. assemblies? How many core CECs are there in
-cubense? etc.
+numerical terms. How many CECs are there in each of the Fusarium genomes
+I included. To do this, I counted the total number of 1s in each columns
+from the bimary matrix, where each column represents a CEC. I then
+merged that data with the metadata df, to keep track going forward.
 
 ``` r
 # ---- summarise the distribution of candidate effector clusters ---- #
-
 # convert the matrix to a data frame
-heatmap_df <- as.data.frame(heatmap_dat) 
+CEC_binary_df <- as.data.frame(binary_matrix)
 
-# count the number of columns to get the total number of CECs
-total_CECs <- ncol(heatmap_df)
+# count the number of columns (minus the label column) to get the total number of CECs
+total_CECs <- ncol(CEC_binary_df)
 
 # total number of candidate effector clusters per assembly (as a dataframe)
-cluster_distib <- enframe(colSums(t(heatmap_df[-1])))
+cluster_distib <- enframe(colSums(t(CEC_binary_df[-1])))
 #rename the value column 
 cluster_distib <- dplyr::rename(cluster_distib, no._CECs = value)
 # merge the two data frames
@@ -833,7 +827,7 @@ knitr::kable(CEC_metadata)
 
 | species         | species_group | fsp          | race            | isolate_code | genome_size | no.\_mimps | no.\_cand_effs | no.\_CECs |
 |:----------------|:--------------|:-------------|:----------------|:-------------|------------:|-----------:|---------------:|----------:|
-| F. graminearum  | Other         | NA           | NA              | PH-1         |        38.0 |          1 |              6 |         6 |
+| F. graminearum  | Other         | NA           | NA              | PH-1         |        38.0 |          1 |              6 |         5 |
 | F. mindanaoense | Other         | NA           | NA              | PD20-05      |          NA |         NA |             NA |        NA |
 | F. sacchari     | Other         | NA           | NA              | FS66         |        47.5 |          9 |             12 |        12 |
 | F. sacchari     | Other         | NA           | NA              | NRRL_66326   |        42.8 |         10 |             15 |        15 |
@@ -849,7 +843,7 @@ knitr::kable(CEC_metadata)
 | F. oxysporum    | F. oxysporum  | apii         | Race 2          | AJ720        |        64.7 |        442 |            399 |       101 |
 | F. oxysporum    | F. oxysporum  | apii         | Race 3          | NRRL38295    |        65.3 |        210 |            328 |        87 |
 | F. oxysporum    | F. oxysporum  | cepae        | Race 2          | FoC_Fus2     |        53.4 |        325 |            359 |        84 |
-| F. oxysporum    | F. oxysporum  | conglutinans | NA              | Fo5176       |        68.0 |        442 |            385 |        86 |
+| F. oxysporum    | F. oxysporum  | conglutinans | NA              | Fo5176       |        68.0 |        442 |            385 |        87 |
 | F. oxysporum    | F. oxysporum  | coriandrii   | NA              | 3-2          |        65.4 |        478 |            315 |        99 |
 | F. oxysporum    | F. oxysporum  | coriandrii   | NA              | AJ615        |        69.3 |        675 |            603 |       106 |
 | F. oxysporum    | F. oxysporum  | coriandrii   | NA              | GL306        |          NA |         NA |             NA |        NA |
@@ -867,16 +861,16 @@ knitr::kable(CEC_metadata)
 | F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44082    |        46.3 |        146 |             50 |        47 |
 | F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44083    |        46.3 |        146 |             50 |        47 |
 | F. oxysporum    | F. oxysporum  | cubense      | NA              | VPRI44084    |        49.5 |        179 |            104 |        56 |
-| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ516        |        68.8 |        522 |            548 |        91 |
-| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ520        |        62.2 |        533 |            343 |        87 |
-| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ592        |        66.0 |        615 |            482 |        86 |
-| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ705        |        66.2 |        614 |            490 |        84 |
-| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ718        |        62.1 |        536 |            260 |        77 |
-| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ865        |        62.7 |        569 |            296 |        77 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ516        |        68.8 |        522 |            548 |        90 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ520        |        62.2 |        533 |            343 |        86 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ592        |        66.0 |        615 |            482 |        85 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 4          | AJ705        |        66.2 |        614 |            490 |        83 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ718        |        62.1 |        536 |            260 |        76 |
+| F. oxysporum    | F. oxysporum  | lactucae     | Race 1          | AJ865        |        62.7 |        569 |            296 |        76 |
 | F. oxysporum    | F. oxysporum  | lini         | NA              | 39_C0058     |        59.2 |        263 |            237 |        87 |
 | F. oxysporum    | F. oxysporum  | lycopersici  | Race 2          | 4287         |        56.2 |        332 |            337 |        80 |
-| F. oxysporum    | F. oxysporum  | matthiolae   | NA              | AJ260        |        60.3 |        301 |            209 |        77 |
-| F. oxysporum    | F. oxysporum  | narcissus    | NA              | FON63        |        60.0 |        555 |            251 |        92 |
+| F. oxysporum    | F. oxysporum  | matthiolae   | NA              | AJ260        |        60.3 |        301 |            209 |        76 |
+| F. oxysporum    | F. oxysporum  | narcissus    | NA              | FON63        |        60.0 |        555 |            251 |        91 |
 | F. oxysporum    | F. oxysporum  | niveum       | np              | 110407-3-1-1 |        49.7 |         52 |             39 |        36 |
 | F. oxysporum    | F. oxysporum  | rapae        | NA              | Tf1208       |        59.8 |        377 |            278 |        82 |
 | F. oxysporum    | F. oxysporum  | vasinfectum  | Race 1          | TF1          |        50.0 |        199 |             91 |        58 |
@@ -886,11 +880,163 @@ knitr::kable(CEC_metadata)
 # summary(CEC_metadata)
 ```
 
+Next I wanted to look at the size of the CECs, how many sequences are
+there in each CEC? Do any fsp have unique CECs which are expanded?
+
+``` r
+# ---- Prep the heatmap data ---- #
+# join the metadata in to make filtering and manipulation later easier
+ CEC_df_all <- left_join(metadata, CEC_df, by = c("label" = "Isolate"))
+
+# ---- group by fsp ---- #
+
+# calculate the total number of CEs in a given CEC per fsp.
+CEC_sizes <- CEC_df_all %>% 
+  group_by(full_name) %>%
+  mutate(across(starts_with("Cluster"),
+              ~ as.numeric(as.character(.)))) %>% 
+  summarize(across(starts_with("Cluster"), sum, na.rm = TRUE))
+```
+
+    ## Warning: There was 1 warning in `summarize()`.
+    ## ℹ In argument: `across(starts_with("Cluster"), sum, na.rm = TRUE)`.
+    ## ℹ In group 1: `full_name = "F. graminearum"`.
+    ## Caused by warning:
+    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+    ## Supply arguments directly to `.fns` through an anonymous function instead.
+    ## 
+    ##   # Previously
+    ##   across(a:b, mean, na.rm = TRUE)
+    ## 
+    ##   # Now
+    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
+
+``` r
+# use the CEC_sizes output to find the range for each fsp (highest number of CEs in a CEC and lowest number of CEs in a CEC, not counting 0)
+CEC_ranges <- CEC_sizes %>%
+  pivot_longer(cols = starts_with("Cluster"), names_to = "column") %>%
+  filter(value != 0) %>%
+  group_by(full_name) %>%
+  summarise(num_highest = sum(value == max(value)), #  report the number of clusters with the max value, just incase it is more than one.
+            highest = if_else(num_highest == 1, first(column[which.max(value)]), NA_character_), #  report the highest cluster unless it is > 1. 
+            highest_value = max(value),
+            num_lowest = sum(value == min(value)), #  report the number of clusters with the min value, becuase it is likely to be more than one.
+            lowest = if_else(num_lowest == 1, first(column[which.min(value)]), NA_character_), #  report the lowest cluster unless it is > 1. 
+            lowest_value = min(value))
+
+# print it nicely
+knitr::kable(CEC_ranges)
+```
+
+| full_name                      | num_highest | highest     | highest_value | num_lowest | lowest | lowest_value |
+|:-------------------------------|------------:|:------------|--------------:|-----------:|:-------|-------------:|
+| F. graminearum                 |           6 | NA          |             1 |          6 | NA     |            1 |
+| F. oxysporum fsp. apii         |           1 | Cluster.219 |           195 |          3 | NA     |            1 |
+| F. oxysporum fsp. cepae        |           1 | Cluster.294 |            52 |         57 | NA     |            1 |
+| F. oxysporum fsp. conglutinans |           1 | Cluster.219 |            48 |         39 | NA     |            1 |
+| F. oxysporum fsp. coriandrii   |           1 | Cluster.234 |           215 |         56 | NA     |            1 |
+| F. oxysporum fsp. cubense      |           1 | Cluster.286 |           195 |         10 | NA     |            1 |
+| F. oxysporum fsp. endophyte    |           1 | Cluster.239 |             9 |         41 | NA     |            1 |
+| F. oxysporum fsp. from rocket  |           1 | Cluster.120 |            13 |         45 | NA     |            1 |
+| F. oxysporum fsp. lactucae     |           1 | Cluster.234 |           628 |          8 | NA     |            1 |
+| F. oxysporum fsp. lini         |           1 | Cluster.73  |            30 |         57 | NA     |            1 |
+| F. oxysporum fsp. lycopersici  |           1 | Cluster.294 |            98 |         51 | NA     |            1 |
+| F. oxysporum fsp. matthiolae   |           1 | Cluster.239 |            24 |         49 | NA     |            1 |
+| F. oxysporum fsp. narcissus    |           1 | Cluster.239 |            23 |         55 | NA     |            1 |
+| F. oxysporum fsp. niveum       |           1 | Cluster.20  |             3 |         34 | NA     |            1 |
+| F. oxysporum fsp. rapae        |           1 | Cluster.73  |            33 |         45 | NA     |            1 |
+| F. oxysporum fsp. vasinfectum  |           3 | NA          |             8 |         50 | NA     |            1 |
+| F. sacchari                    |           9 | NA          |             2 |          9 | NA     |            1 |
+| Fusarium                       |          12 | NA          |             1 |         12 | NA     |            1 |
+
+Cluster234 is very large, with 268 CEs in lactucae - is this likley?
+
+I wonder if Cluster234 is generally large, I’ll take a look at the
+clusters to find out which are largest and smallest overall.
+
+``` r
+# now calculate the largest clusters
+CEC_overall_sizes <- CEC_sizes %>%
+  pivot_longer(cols = -full_name, names_to = "column") %>%
+  filter(value != 0) %>%
+  group_by(column) %>%
+  summarise(total_value = sum(value),
+            num_values = sum(value != 0)) %>%
+  ungroup() %>%
+  summarise(largest_column = column[which.max(total_value)],
+            largest_total = max(total_value),
+            num_largest = sum(total_value == max(total_value)),
+            smallest_total = min(total_value),
+            num_smallest = sum(total_value == min(total_value)))
+            
+# print it nicely
+knitr::kable(CEC_overall_sizes)
+```
+
+| largest_column | largest_total | num_largest | smallest_total | num_smallest |
+|:---------------|--------------:|------------:|---------------:|-------------:|
+| Cluster.234    |           895 |           1 |              1 |           80 |
+
+Cluster 234 is the largest overall, helped, no doubt, by lactucae. 895
+sequences in that cluster seems considerable! I’m doubtful that’s
+actually an effector - its possibly an ABC transporter which has not
+been filtered out by EffectorP. It tends to do that.
+
+There are 80 CECs with just 1 sequence, some may be genuine, some may
+not.
+
+I want to look at the distribution of the count of CEs in the CECs.
+
+``` r
+# ---- prepare the data ---- #
+
+CEC_count <- CEC_df_all %>% 
+  mutate(across(starts_with("Cluster"),
+              ~ as.numeric(as.character(.)))) %>% 
+  summarize(across(starts_with("Cluster"), sum, na.rm = TRUE)) %>%
+  pivot_longer(cols = everything(), names_to = "Cluster", values_to = "Count") # name the columns for ggplot
+
+# ---- quick summary stats ---- #
+
+# Calculate mean and standard deviation for normal distribution
+CEC_mean_value <- mean(CEC_count$Count)
+CEC_sd_value <- sd(CEC_count$Count)
+
+
+# ---- plot the CEC counts ---- #
+CEC_count_plot <- ggplot(CEC_count, aes(x = Count)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 1, fill = "lightblue", colour = "black") +
+  stat_function(fun = dnorm, args = list(mean = CEC_mean_value, sd = CEC_sd_value), color = "red", linewidth = 0.5) +
+  labs(title = "Count of Clusters", x = "Count", y = "Density")
+
+#plot it
+plot(CEC_count_plot)
+```
+
+![](AnalysisCandidateEffectorSets_files/figure-gfm/plot%20of%20CE%20distrib%20in%20CEC-1.png)<!-- -->
+
+The majority of the clusters have 0 or 1 CE in them, with only a handful
+having \> 500 CEs.
+
 ### Build heatmap of CECs
 
 Next, I build the CEC heatmap. I did originally do this alongside the
 TEF phlyo, but it looks messy and unclear, plus you can see the fsp
 clusters more clearly using ComplexHeatmap::pheatmap.
+
+First, I clustered the data in the binary data matrix, so that it will
+be ordered when I visualise the candidate effector heatmap.
+
+``` r
+# ---- Cluster the heatmap data ---- #
+# normalisiation is mandatory for clustering, but as my data is binary - i did not normalise. 
+# Compute hierarchical clustering of columns
+heatmap_dat <- cluster_matrix(binary_matrix, method ="ward.D2")
+```
+
+Next, I built the plot. I started using `pheatmap` but that didn’t have
+all the functionality I wanted, so I swapped to `ComplexHeatmap` with
+the `pheatmap` plug in, so I didn’t have to start the heatmap again!
 
 ``` r
 # ---- Add metadata to heatmap ---- #
@@ -907,21 +1053,6 @@ heatmap_metadf <- select(metadata,"label","no._mimps","no._cand_effs", "no._CECs
   unite(ID, c(Species, isolate_code), sep = " ", remove = F, na.rm = T) %>%
   remove_rownames %>% 
   tibble::column_to_rownames(var="name")
-```
-
-    ## Warning: There was 1 warning in `mutate()`.
-    ## ℹ In argument: `across("Species", str_replace, "F. oxysporum", "Fo.")`.
-    ## Caused by warning:
-    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
-    ## Supply arguments directly to `.fns` through an anonymous function instead.
-    ## 
-    ##   # Previously
-    ##   across(a:b, mean, na.rm = TRUE)
-    ## 
-    ##   # Now
-    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
-
-``` r
 # because complex heatmap cant cope with the order of the df being different from the matrix, I have to reorder out df to match the matrix.
 heatmap_metadf_ordered<- heatmap_metadf[rownames(binary_matrix), ]
 
@@ -1068,8 +1199,8 @@ summary(Fo_CEC_medtadata)
     ##     no._CECs     
     ##  Min.   : 34.00  
     ##  1st Qu.: 46.25  
-    ##  Median : 77.00  
-    ##  Mean   : 69.03  
+    ##  Median : 76.00  
+    ##  Mean   : 68.84  
     ##  3rd Qu.: 87.00  
     ##  Max.   :106.00  
     ##  NA's   :1
@@ -1131,12 +1262,12 @@ summary(Fola_CEC_medtadata)
     ##                     3rd Qu.:66.15   3rd Qu.:602.8   3rd Qu.:488.0  
     ##                     Max.   :68.80   Max.   :615.0   Max.   :548.0  
     ##     no._CECs    
-    ##  Min.   :77.00  
-    ##  1st Qu.:78.75  
-    ##  Median :85.00  
-    ##  Mean   :83.67  
-    ##  3rd Qu.:86.75  
-    ##  Max.   :91.00
+    ##  Min.   :76.00  
+    ##  1st Qu.:77.75  
+    ##  Median :84.00  
+    ##  Mean   :82.67  
+    ##  3rd Qu.:85.75  
+    ##  Max.   :90.00
 
 ``` r
 # extract just the apii rows from the CEC_metadata
@@ -1237,8 +1368,8 @@ assemblies in a specific fsp.
 # ---- summarise the distribution of candidate effector clusters in all assemblies  ---- #
 
 # count the number of rows where the column total is >= the number of rows (a shared candidate effector cluster!)
-shared_cluster <- heatmap_df %>%
-  select_if(colSums(heatmap_df) >= nrow(heatmap_df))
+shared_cluster <- CEC_binary_df %>%
+  select_if(colSums(CEC_binary_df) >= nrow(CEC_binary_df))
 # count the number of columns 
 ncol(shared_cluster)
 ```
@@ -1249,7 +1380,7 @@ ncol(shared_cluster)
 # ---- summarise the distribution of candidate effector clusters in Fo ---- #
 
 # subset only the Fo rows
-heatmap_Fo_only <- subset(heatmap_df, grepl("^Fo", rownames(heatmap_df)))
+heatmap_Fo_only <- subset(CEC_binary_df, grepl("^Fo", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Fo_shared <- heatmap_Fo_only %>%
   select_if(colSums(heatmap_Fo_only) >= nrow(heatmap_Fo_only))
@@ -1263,7 +1394,7 @@ ncol(heatmap_Fo_shared)
 # ---- summarise the distribution of candidate effector clusters in cubense ---- #
 
 # subset only the Foc rows
-heatmap_Foc_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense", rownames(heatmap_df)))
+heatmap_Foc_only <- subset(CEC_binary_df, grepl("^Fo._fsp._cubense", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foc_shared <- heatmap_Foc_only %>%
   select_if(colSums(heatmap_Foc_only) >= nrow(heatmap_Foc_only))
@@ -1277,7 +1408,7 @@ ncol(heatmap_Foc_shared)
 # ---- summarise the distribution of candidate effector clusters in lactucae ---- #
 
 # subset only the Fola rows
-heatmap_Fola_only <- subset(heatmap_df, grepl("^Fo._fsp._lactucae", rownames(heatmap_df)))
+heatmap_Fola_only <- subset(CEC_binary_df, grepl("^Fo._fsp._lactucae", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Fola_shared <- heatmap_Fola_only %>%
   select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
@@ -1291,7 +1422,7 @@ ncol(heatmap_Fola_shared)
 # ---- summarise the distribution of candidate effector clusters in apii ---- #
 
 # subset only the Foa rows
-heatmap_Foa_only <- subset(heatmap_df, grepl("^Fo._fsp._apii", rownames(heatmap_df)))
+heatmap_Foa_only <- subset(CEC_binary_df, grepl("^Fo._fsp._apii", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foa_shared <- heatmap_Foa_only %>%
   select_if(colSums(heatmap_Foa_only) >= nrow(heatmap_Foa_only))
@@ -1305,7 +1436,7 @@ ncol(heatmap_Foa_shared)
 # ---- summarise the distribution of candidate effector clusters in coriandrii ---- #
 
 # subset only the Foci rows
-heatmap_Foci_only <- subset(heatmap_df, grepl("^Fo._fsp._coriandrii", rownames(heatmap_df)))
+heatmap_Foci_only <- subset(CEC_binary_df, grepl("^Fo._fsp._coriandrii", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foci_shared <- heatmap_Foci_only %>%
   select_if(colSums(heatmap_Foci_only) >= nrow(heatmap_Foci_only))
@@ -1319,7 +1450,7 @@ ncol(heatmap_Foci_shared)
 # ---- summarise the distribution of candidate effector clusters in apii and coridanrii (as they share some hosts) ---- #
 
 # subset only the Foa and Foci rows
-heatmap_Foa_c_only <- subset(heatmap_df, grepl("^Fo._fsp._apii|^Fo._fsp._coriandrii", rownames(heatmap_df)))
+heatmap_Foa_c_only <- subset(CEC_binary_df, grepl("^Fo._fsp._apii|^Fo._fsp._coriandrii", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foa_c_shared <- heatmap_Foa_c_only %>%
   select_if(colSums(heatmap_Foa_c_only) >= nrow(heatmap_Foa_c_only))
@@ -1333,7 +1464,7 @@ ncol(heatmap_Foa_c_shared)
 # ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
 
 # subset only the Foa and Foci rows
-heatmap_Fs_only <- subset(heatmap_df, grepl("^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+heatmap_Fs_only <- subset(CEC_binary_df, grepl("^F._sacchari_|^F._TNAU", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Fs_shared <- heatmap_Fs_only %>%
   select_if(colSums(heatmap_Fs_only) >= nrow(heatmap_Fs_only))
@@ -1349,7 +1480,7 @@ Are the ‘core CECs’ in Fs also found in Focub?
 # ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
 
 # subset only the Foa and Foci rows
-heatmap_banana_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense|^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+heatmap_banana_only <- subset(CEC_binary_df, grepl("^Fo._fsp._cubense|^F._sacchari_|^F._TNAU", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_banana_shared <- heatmap_banana_only %>%
   select_if(colSums(heatmap_banana_only) >= nrow(heatmap_banana_only))
@@ -1401,8 +1532,8 @@ knitr::kable(fola_CEC_stats_sum)
 
 | race   | count | mean_CEC | min_CEC | max_CEC |
 |:-------|------:|---------:|--------:|--------:|
-| Race 1 |     3 | 80.33333 |      77 |      87 |
-| Race 4 |     3 | 87.00000 |      84 |      91 |
+| Race 1 |     3 | 79.33333 |      76 |      86 |
+| Race 4 |     3 | 86.00000 |      83 |      90 |
 
 ``` r
 knitr::kable(foa_CEC_stats_sum)

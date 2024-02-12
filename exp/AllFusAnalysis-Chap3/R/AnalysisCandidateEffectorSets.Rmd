@@ -513,13 +513,10 @@ rownames(binary_matrix)<-rownames_mat
 CEC_matrix<- as.matrix(data)
 # make it a df 
 CEC_df <- as.data.frame(CEC_matrix)
-
-metadata
-
 ```
 
 
-First, I wanted to look at the distribution of the these clusters in numerical terms. How many are shared among all assemblies? How many are shared among all Fo. assemblies? How many core CECs are there in cubense? etc. 
+First, I wanted to look at the distribution of the these clusters in numerical terms. How many CECs are there in each of the Fusarium genomes I included. To do this, I counted the total number of 1s in each columns from the bimary matrix, where each column represents a CEC. I then merged that data with the metadata df, to keep track going forward.  
 
 ```{r summary stats of effector clusters}
 
@@ -548,7 +545,7 @@ knitr::kable(CEC_metadata)
 
 ```
 
-Now I want to look at the size of the CECs, how many sequences are there in each? Do any fsp have unique CECs which are expanded?
+Next I wanted to look at the size of the CECs, how many sequences are there in each CEC? Do any fsp have unique CECs which are expanded?
 
 ```{r CEC sizes and distribution by fsp}
 
@@ -582,7 +579,9 @@ knitr::kable(CEC_ranges)
 
 ```
 
-Now i want to see what clusters are largest and smallest overall.
+Cluster234 is very large, with 268 CEs in lactucae - is this likley? 
+
+I wonder if Cluster234 is generally large, I'll take a look at the clusters to find out which are largest and smallest overall.
 
 ```{r CEC sizes and distribution}
 
@@ -604,9 +603,47 @@ CEC_overall_sizes <- CEC_sizes %>%
 knitr::kable(CEC_overall_sizes)
 
 ```
+Cluster 234 is the largest overall, helped, no doubt, by lactucae. 895 sequences in that cluster seems considerable! I'm doubtful that's actually an effector - its possibly an ABC transporter which has not been filtered out by EffectorP. It tends to do that. 
+
+There are 80 CECs with just 1 sequence, some may be genuine, some may not. 
+
+I want to look at the distribution of the count of CEs in the CECs. 
+
+```{r plot of CE distrib in CEC}
+
+# ---- prepare the data ---- #
+
+CEC_count <- CEC_df_all %>% 
+  mutate(across(starts_with("Cluster"),
+              ~ as.numeric(as.character(.)))) %>% 
+  summarize(across(starts_with("Cluster"), sum, na.rm = TRUE)) %>%
+  pivot_longer(cols = everything(), names_to = "Cluster", values_to = "Count") # name the columns for ggplot
+
+# ---- quick summary stats ---- #
+
+# Calculate mean and standard deviation for normal distribution
+CEC_mean_value <- mean(CEC_count$Count)
+CEC_sd_value <- sd(CEC_count$Count)
 
 
-I clustered the data in the binary data matrix, so that it will be ordered  when I visualise the candidate effector heatmap.
+# ---- plot the CEC counts ---- #
+CEC_count_plot <- ggplot(CEC_count, aes(x = Count)) +
+  geom_histogram(aes(y = after_stat(density)), binwidth = 1, fill = "lightblue", colour = "black") +
+  stat_function(fun = dnorm, args = list(mean = CEC_mean_value, sd = CEC_sd_value), color = "red", linewidth = 0.5) +
+  labs(title = "Count of Clusters", x = "Count", y = "Density")
+
+#plot it
+plot(CEC_count_plot)
+
+```
+
+The majority of the clusters have 0 or 1 CE in them, with only a handful having > 500 CEs.
+
+### Build heatmap of CECs
+
+Next, I build the CEC heatmap. I did originally do this alongside the TEF phlyo, but it looks messy and unclear, plus you can see the fsp clusters more clearly using ComplexHeatmap::pheatmap.
+
+First, I clustered the data in the binary data matrix, so that it will be ordered  when I visualise the candidate effector heatmap.
 
 ```{r dendrogram of effector clusters, fig.height= 5, fig.width= 20}
 # ---- Cluster the heatmap data ---- #
@@ -616,11 +653,8 @@ heatmap_dat <- cluster_matrix(binary_matrix, method ="ward.D2")
 
 ```
 
-
-### Build heatmap of CECs
-
-Next, I build the CEC heatmap. I did originally do this alongside the TEF phlyo, but it looks messy and unclear, plus you can see the fsp clusters more clearly using ComplexHeatmap::pheatmap. 
-
+Next, I built the plot. I started using `pheatmap` but that didn't have all the functionality I wanted, so I swapped to `ComplexHeatmap` with the `pheatmap` plug in, so I didn't have to start the heatmap again!
+ 
 ```{r final heatmap, fig.height= 12, fig.width= 24}
 # ---- Add metadata to heatmap ---- #
 
@@ -798,15 +832,15 @@ I also wanted to know what CECs were shared among all assemblies, and which were
 # ---- summarise the distribution of candidate effector clusters in all assemblies  ---- #
 
 # count the number of rows where the column total is >= the number of rows (a shared candidate effector cluster!)
-shared_cluster <- heatmap_df %>%
-  select_if(colSums(heatmap_df) >= nrow(heatmap_df))
+shared_cluster <- CEC_binary_df %>%
+  select_if(colSums(CEC_binary_df) >= nrow(CEC_binary_df))
 # count the number of columns 
 ncol(shared_cluster)
 
 # ---- summarise the distribution of candidate effector clusters in Fo ---- #
 
 # subset only the Fo rows
-heatmap_Fo_only <- subset(heatmap_df, grepl("^Fo", rownames(heatmap_df)))
+heatmap_Fo_only <- subset(CEC_binary_df, grepl("^Fo", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Fo_shared <- heatmap_Fo_only %>%
   select_if(colSums(heatmap_Fo_only) >= nrow(heatmap_Fo_only))
@@ -816,7 +850,7 @@ ncol(heatmap_Fo_shared)
 # ---- summarise the distribution of candidate effector clusters in cubense ---- #
 
 # subset only the Foc rows
-heatmap_Foc_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense", rownames(heatmap_df)))
+heatmap_Foc_only <- subset(CEC_binary_df, grepl("^Fo._fsp._cubense", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foc_shared <- heatmap_Foc_only %>%
   select_if(colSums(heatmap_Foc_only) >= nrow(heatmap_Foc_only))
@@ -826,7 +860,7 @@ ncol(heatmap_Foc_shared)
 # ---- summarise the distribution of candidate effector clusters in lactucae ---- #
 
 # subset only the Fola rows
-heatmap_Fola_only <- subset(heatmap_df, grepl("^Fo._fsp._lactucae", rownames(heatmap_df)))
+heatmap_Fola_only <- subset(CEC_binary_df, grepl("^Fo._fsp._lactucae", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Fola_shared <- heatmap_Fola_only %>%
   select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
@@ -836,7 +870,7 @@ ncol(heatmap_Fola_shared)
 # ---- summarise the distribution of candidate effector clusters in apii ---- #
 
 # subset only the Foa rows
-heatmap_Foa_only <- subset(heatmap_df, grepl("^Fo._fsp._apii", rownames(heatmap_df)))
+heatmap_Foa_only <- subset(CEC_binary_df, grepl("^Fo._fsp._apii", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foa_shared <- heatmap_Foa_only %>%
   select_if(colSums(heatmap_Foa_only) >= nrow(heatmap_Foa_only))
@@ -846,7 +880,7 @@ ncol(heatmap_Foa_shared)
 # ---- summarise the distribution of candidate effector clusters in coriandrii ---- #
 
 # subset only the Foci rows
-heatmap_Foci_only <- subset(heatmap_df, grepl("^Fo._fsp._coriandrii", rownames(heatmap_df)))
+heatmap_Foci_only <- subset(CEC_binary_df, grepl("^Fo._fsp._coriandrii", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foci_shared <- heatmap_Foci_only %>%
   select_if(colSums(heatmap_Foci_only) >= nrow(heatmap_Foci_only))
@@ -856,7 +890,7 @@ ncol(heatmap_Foci_shared)
 # ---- summarise the distribution of candidate effector clusters in apii and coridanrii (as they share some hosts) ---- #
 
 # subset only the Foa and Foci rows
-heatmap_Foa_c_only <- subset(heatmap_df, grepl("^Fo._fsp._apii|^Fo._fsp._coriandrii", rownames(heatmap_df)))
+heatmap_Foa_c_only <- subset(CEC_binary_df, grepl("^Fo._fsp._apii|^Fo._fsp._coriandrii", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Foa_c_shared <- heatmap_Foa_c_only %>%
   select_if(colSums(heatmap_Foa_c_only) >= nrow(heatmap_Foa_c_only))
@@ -867,7 +901,7 @@ ncol(heatmap_Foa_c_shared)
 # ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
 
 # subset only the Foa and Foci rows
-heatmap_Fs_only <- subset(heatmap_df, grepl("^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+heatmap_Fs_only <- subset(CEC_binary_df, grepl("^F._sacchari_|^F._TNAU", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_Fs_shared <- heatmap_Fs_only %>%
   select_if(colSums(heatmap_Fs_only) >= nrow(heatmap_Fs_only))
@@ -882,7 +916,7 @@ Are the 'core CECs' in Fs also found in Focub?
 # ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
 
 # subset only the Foa and Foci rows
-heatmap_banana_only <- subset(heatmap_df, grepl("^Fo._fsp._cubense|^F._sacchari_|^F._TNAU", rownames(heatmap_df)))
+heatmap_banana_only <- subset(CEC_binary_df, grepl("^Fo._fsp._cubense|^F._sacchari_|^F._TNAU", rownames(CEC_binary_df)))
 # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
 heatmap_banana_shared <- heatmap_banana_only %>%
   select_if(colSums(heatmap_banana_only) >= nrow(heatmap_banana_only))
