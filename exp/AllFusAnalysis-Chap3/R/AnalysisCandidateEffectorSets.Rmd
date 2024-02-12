@@ -1,6 +1,7 @@
 ---
 title: "Analysis of Candidate Effectors"
 output: github_document
+toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -22,6 +23,8 @@ Candidate effectors were generated as part of the Third Chapter of my thesis. Th
 # install.packages('tidytree')
 # install.packages('ggpubr')
 # install.packages('nortest')
+# library(devtools)
+# install_github("jokergoo/ComplexHeatmap")
 
 # ---- Load required libraries ---- #
 #for stats
@@ -44,10 +47,12 @@ library(ggtreeExtra)
 library(ape)
 
 #for heatmaps
+library(ComplexHeatmap)
 library(textshape)
 library(RColorBrewer)
 library(ggnewscale)
 library(pheatmap)
+library(circlize)
 ```
 
 
@@ -156,7 +161,7 @@ First, I subset the data I needed from the `Metadata`, and removed the isolates 
 #subset the df so that we can perform stats on genome size and mimp/cand eff distribution
 stats_data <- select(metadata, "species", "fsp", "isolate_code","no._mimps","no._cand_effs","genome_size") %>%
 #Rename the columns to reduce the long titles
-  rename(isolate=isolate_code,
+   dplyr::rename(isolate=isolate_code,
          mimps=no._mimps,
          candidate_effectors=no._cand_effs,
          assembly_size =genome_size)
@@ -312,7 +317,7 @@ First, I have to prepare my data set. I used the metadata file loaded initially.
 #Extract the isolate, assembly size, total number of mimps and effectors columns.
 stats_plot_data <- select(metadata,"species", "species_group", "fsp", "isolate_code","genome_size","no._mimps","no._cand_effs") %>%
 #Rename the columns to reduce the long titles
-  rename(isolate=isolate_code,                                    
+  dplyr::rename(isolate=isolate_code,                                    
          mimps=no._mimps,
          candidate_effectors=no._cand_effs,
          assembly_size =genome_size) %>%  
@@ -391,7 +396,7 @@ I plotted the mimp and effector content from the metadata and visualised it usin
 #Extract the isolate, assembly size, total number of mimps and effectors coloumns.
 race_plot_data <- select(metadata,"species", "species_group", "fsp", "race" ,"isolate_code","genome_size","no._mimps","no._cand_effs") %>%
 #Rename the columns to reduce the long titles
-  rename(isolate=isolate_code,                                    
+  dplyr::rename(isolate=isolate_code,                                    
          mimps=no._mimps,
          candidate_effectors=no._cand_effs,
          assembly_size =genome_size) %>%  
@@ -488,7 +493,7 @@ knitr::kable(foa_stats_sum)
 
 Now I have an understanding of the effector distribution and the phylogeny, I combined the phylogenies and effector profiles to generate a heat map. For this, I can use the tree (p4) already generated and add the heatmap data I loaded initially (data).
 
-First, I need to prepare the heatmap data. As we are looking at clustered (0.65% ID, cd-hit (v...)) and filtered sequences (SignalP (v5.06) and EffectorP (v2.0.1) extracted from BLAST hits, the total number of candidate effectors per cluster per isolate varies, but I want to just look at Presence/\nAbsence. In order to do this, I converted the heatmap data matrix to a binary data frame. 
+Now, I need to prepare the heatmap data. As we are looking at clustered (0.65% ID, cd-hit (v...)) and filtered sequences (SignalP (v5.06) and EffectorP (v2.0.1) extracted from BLAST hits, the total number of candidate effectors per cluster per isolate varies, but I want to just look at Presence/Absence. In order to do this, I converted the heatmap data matrix to a binary data frame. 
 
 ```{r heatmap data prep}
 # ---- Prep the heatmap data ---- #
@@ -502,71 +507,19 @@ binary_matrix[binary_matrix > 0] <- 1
 rownames(binary_matrix)<-rownames_mat
 ```
 
-Next, I clustered the data in the binary data matrix, so that it will be ordered  when I visualise the candidate effector heatmap.
+I clustered the data in the binary data matrix, so that it will be ordered  when I visualise the candidate effector heatmap.
 
 ```{r dendrogram of effector clusters, fig.height= 5, fig.width= 20}
 # ---- Cluster the heatmap data ---- #
 # normalisiation is mandatory for clustering, but as my data is binary - i did not normalise. 
 # Compute hierarchical clustering of columns
-heatmap_dat <- cluster_matrix(binary_matrix, dim = 'col', method ="ward.D2")
+heatmap_dat <- cluster_matrix(binary_matrix, method ="ward.D2")
 
 ```
 
-Next, in theory, I add the heatmap to the tree already built... but I cant get the offsets to align consistently and it overlaps if i just add heatmap_dat to p4, so I have to rebuild p4.
+### Summary statistics of candidate effector clusters
 
-```{r final heatmap, fig.height= 15, fig.width= 25}
-# ---- Build the full figure ---- #
-p2 <- p +  
-  geom_treescale(x = 0, y = 1, width = 0.004) + 
-  geom_tiplab(aes(label = full_name), offset = 0.0015) +
-  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.05, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "grey20", offset = 0.088, linetype = "blank", geom = "text", align = TRUE)+
-  geom_tippoint(aes(shape = source), size = 3) +
-  geom_rootedge() +
-  theme(legend.position = "bottom")
-
-#add extra scale so we can plot fsp with colour
-p3 <- p2 + new_scale_fill()
-# add race data
-p4 <- gheatmap(p3, fsp_df,
-               offset = 0.04, 
-               width = 0.03,
-               color = "grey20",
-               colnames = FALSE) +
-  scale_fill_manual(name = "Fsp",
-                    values = c("blue","purple","goldenrod4","grey90","gold","brown", "lightpink","darkolivegreen3", "grey20", "tomato", "lavender", "tan", "palegreen4", "coral", "yellow"), na.value = "grey") +
-  theme(legend.position = "bottom",
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 12),
-        legend.box = "vertical", legend.margin = margin())+
-  guides(shape = guide_legend(override.aes = list(size = 2)))
-
-# add extra discrete scale
-p5 <- p4 + new_scale_fill()
-
-# add effector heatmap
-p6 <-gheatmap(p5, heatmap_dat, offset=0.13, colnames=FALSE, legend_title="Presence/\nAbsence", color = "grey",  width = 1.75)  +
-  scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
-                        breaks = c("Absent","Present"),
-                        na.value = "grey")+
-  guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
-  theme(legend.position = "bottom",
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12),
-        legend.box = "horizontal", legend.margin = margin())+
-  guides(shape = guide_legend(override.aes = list(size = 4)))
-
-plot(p6)
-
-# save the output
-ggsave("HeatmapAndPhylo.png", width = 25, height = 15)
-
-```
-
-### Summary statistics of candidate effector clusters
-
-I also wanted to look at the distribution of the these clusters in numerical terms. How many are shared among all assemblies? How many are shared among all Fo. assemblies? How many core CECs are there in cubense? etc. 
+First, I wanted to look at the distribution of the these clusters in numerical terms. How many are shared among all assemblies? How many are shared among all Fo. assemblies? How many core CECs are there in cubense? etc. 
 
 ```{r summary stats of effector clusters}
 
@@ -581,7 +534,7 @@ total_CECs <- ncol(heatmap_df)
 # total number of candidate effector clusters per assembly (as a dataframe)
 cluster_distib <- enframe(colSums(t(heatmap_df[-1])))
 #rename the value column 
-cluster_distib <- rename(cluster_distib, no._CECs = value)
+cluster_distib <- dplyr::rename(cluster_distib, no._CECs = value)
 # merge the two data frames
 metadata <- merge(metadata, cluster_distib, by.x = "label", by.y = "name", all.x = TRUE)
 
@@ -596,6 +549,135 @@ knitr::kable(CEC_metadata)
 
 ```
 
+### Build heatmap of CECs
+
+Next, I build the CEC heatmap. I did originally do this alongside the TEF phlyo, but it looks messy and unclear, plus you can see the fsp clusters more clearly using ComplexHeatmap::pheatmap. 
+
+```{r final heatmap, fig.height= 12, fig.width= 24}
+# ---- Add metadata to heatmap ---- #
+
+# first, select the data we want from metadata and make the "label column in metadata the row names"
+heatmap_metadf <- select(metadata,"label","no._mimps","no._cand_effs", "no._CECs", "race", "full_name", "isolate_code") %>%
+  dplyr::rename(name=label,
+                Species =full_name,
+                CECs=no._CECs,
+                CEs = no._cand_effs,
+                mimps =no._mimps,) %>% 
+  drop_na(CECs) %>%
+  mutate(across('Species', str_replace, 'F. oxysporum', 'Fo.')) %>% # shorten the species name for Fusarium oxysporum.
+  unite(ID, c(Species, isolate_code), sep = " ", remove = F, na.rm = T) %>%
+  remove_rownames %>% 
+  tibble::column_to_rownames(var="name")
+# because complex heatmap cant cope with the order of the df being different from the matrix, I have to reorder out df to match the matrix.
+heatmap_metadf_ordered<- heatmap_metadf[rownames(binary_matrix), ]
+
+#add isolate ids
+ID <- as.list(heatmap_metadf_ordered$ID)
+
+# ---- set my colours ---- #
+
+anno_colours_r <- list(
+           Species = c(
+             "Fo. fsp. apii" = "blue",
+             "Fo. fsp. cepae" = "purple",
+             "Fo. fsp. conglutinans" = "goldenrod",
+             "Fo. fsp. coriandrii" = "grey90",
+             "Fo. fsp. cubense" = "gold",
+             "Fo. fsp. lactucae" = "darkolivegreen3",
+             "Fo. fsp. lini" = "indianred",
+             "Fo. fsp. lycopersici" = "tomato",
+             "Fo. fsp. matthiolae" = "lavender",
+             "Fo. fsp. narcissus" = "yellow",
+             "Fo. fsp. niveum" = "palegreen4",
+             "Fo. fsp. rapae" = "slateblue",
+             "Fo. fsp. from rocket" = "tan",
+             "Fo. fsp. vasinfectum" = "steelblue",
+             "Fo. fsp. endophyte" = "brown",
+             "F. graminearum" = "burlywood4",
+             "F. sacchari" = "pink",
+             "Fusarium" = "red"),
+           Race = c(
+             "np" = "bisque",
+             "Race 1" = "gold4",
+             "Race 2" = "yellow3",
+             "Race 3" = "lightblue",
+             "Race 4" = "navy",
+             "Tropical Race 4" = "green4"))
+
+anno_colours_cec = colorRamp2(c(0, 150), c("white", "darkorchid4"))
+anno_colours_ce = colorRamp2(c(0, 600), c("white", "darkolivegreen"))
+anno_colours_mimp = colorRamp2(c(0, 800), c("white", "goldenrod1"))
+
+# ---- create heatmap annotations ---- #
+
+# add column barplot
+column_anno = HeatmapAnnotation(
+  "CEC size" = anno_barplot(colSums(binary_matrix), 
+                            outline = FALSE, 
+                            gp = gpar(fill = "black")))
+
+#add row data - CEC, CE and mimp count.
+row_anno_l <- rowAnnotation(
+  "Total CECs" = heatmap_metadf_ordered$CECs, 
+  "Total CEs" = heatmap_metadf_ordered$CEs,
+  "Total mimps" = heatmap_metadf_ordered$mimps,
+  col = list("Total CECs" = anno_colours_cec,
+             "Total CEs" = anno_colours_ce,
+             "Total mimps" = anno_colours_mimp),
+  gp = gpar(col = "white")
+)
+
+
+row_anno_r = rowAnnotation(
+  "Species" = heatmap_metadf_ordered$Species, 
+  "Race" = heatmap_metadf_ordered$race, 
+  col = anno_colours_r, 
+  na_col = NA, 
+  gp = gpar(col = "white"))
+ 
+# ---- pheatmap plot of CECs ---- #
+
+effector_heatmap <- ComplexHeatmap::pheatmap(
+  binary_matrix, 
+  color = colorRampPalette(c("grey90", "black"))(2), 
+  name = "Binary distribution",
+  legend = T,
+  heatmap_legend_param = list(
+    #at = seq(1, 10, by = 1),  #wär gleich: at = 1:10,       
+    at = 0:1,
+    legend_gp = gpar(fill = 0:1, fontsize = 2),
+    color_bar = "discrete"
+  ),
+  legend_labels = c("Absent", "Present"),
+  show_colnames = F,
+  clustering_distance_rows = "binary",
+  clustering_distance_cols = "binary",
+  #cellwidth = 2, 
+  #cellheight = 20,
+  border_color = NA,
+  treeheight_row = 80,
+  treeheight_col = 20,
+  na_col = "white", 
+  row_labels = ID,
+  row_names_side = "right",
+  top_annotation = column_anno,
+  left_annotation = row_anno_l,
+  right_annotation = row_anno_r,
+  fontsize = 12
+)
+
+# add bar plot annotations
+effector_heatmap 
+
+#save it
+png(file="EffectorsHeatmap.png", width = 24, height = 12, unit = "in", res = 150)
+draw(effector_heatmap)
+dev.off()
+
+```
+
+
+As well as plotting the CEC distribution, I also want to get a numerical overview. First, I looked at the overall distribution and summary statistics of CECs.
 ```{r stats of effector clusters per fsp}
 
 # ---- candidate effector clusters in Fo ---- #
@@ -604,6 +686,11 @@ knitr::kable(CEC_metadata)
 Fo_CEC_medtadata <- subset(CEC_metadata, !grepl("Other", species_group))
 #summarise
 summary(Fo_CEC_medtadata)
+```
+The number of CECs in Fo. only doesn't vary as widely as the number of CECs across all Fusarium assemblies included (see range).
+
+Next, I looked at specific fsp. of interest as well as comparing the *F. sacchari*  genome assemblies. 
+```{r stats of effector clusters per fsp 2}
 
 # ---- candidate effector clusters in fsp ---- #
 
@@ -634,6 +721,10 @@ summary(Fs_CEC_medtadata)
 
 
 ```
+
+#### Core CEC distribution
+
+I also wanted to know what CECs were shared among all assemblies, and which were shared among all Fo. and which were shared among all assemblies in a specific fsp. 
 
 ```{r stats of core effector clusters}
 # ---- summarise the distribution of candidate effector clusters in all assemblies  ---- #
@@ -717,8 +808,7 @@ ncol(heatmap_Fs_shared)
 
 ```
 
-#### Are the 'core CECs' in Fs also found in Focub? 
-
+Are the 'core CECs' in Fs also found in Focub? 
 
 ```{r banana pathogen core}
 # ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
@@ -733,7 +823,7 @@ ncol(heatmap_banana_shared)
 
 ```
 
-### Distribution of CECs among races 
+How are CECs distributed among races?
 
 ```{r race stats of CECs in fsp}
 # ---- subset the fsp of interest ---- #
@@ -769,7 +859,7 @@ knitr::kable(foa_CEC_stats_sum)
 
 ### Candidate effector cluster distribution in Fo. fsp. cubense
 
-Now I have my overall heatmap, I want to look at some of the fsp in more detail - particularly those for which we have multiple races available. I subset my metadata, searched for all caseses that did not match the regex "Fo._fsp._cubense" and dropped them from the tree using the `drop.tip` function. I the reconstructed my tree using just the Foc tef phylo and foc effector profiles. 
+Now I have my overall heatmap, I want to look at some of the fsp in more detail, including the TEF phylogeny data - particularly those for which we have multiple races available. I subset my metadata, searched for all cases that did not match the regex "Fo._fsp._cubense" and dropped them from the tree using the `drop.tip` function. I the reconstructed my tree using just the Foc tef phylo and foc effector profiles using the gheatmap package from ggtree. 
 
 ```{r cubense effector distib, fig.height= 10, fig.width= 20}
 
@@ -814,7 +904,7 @@ foc_tree_3 <- foc_tree_2 + new_scale_fill()
 # add race data
 foc_tree_4 <- gheatmap(foc_tree_3, foc_heat_df, offset=0.008, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
+                        low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
                         na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
@@ -891,9 +981,9 @@ foa_c_tree_3 <- foa_c_tree_2 + new_scale_fill()
 # add race data
 foa_c_tree_4 <- gheatmap(foa_c_tree_3, foa_c_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
+                        low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
-                        na.value = "grey")+
+                        na.value = "white")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),
@@ -962,9 +1052,9 @@ fola_tree_3 <- fola_tree_2 + new_scale_fill()
 # add race data
 fola_tree_4 <- gheatmap(fola_tree_3, fola_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
+                        low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
-                        na.value = "grey") +
+                        na.value = "white") +
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1)) +
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),

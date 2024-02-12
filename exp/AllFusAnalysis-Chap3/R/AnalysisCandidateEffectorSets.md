@@ -1,6 +1,8 @@
 Analysis of Candidate Effectors
 ================
 
+true
+
 ## Data set
 
 Candidate effectors were generated as part of the Third Chapter of my
@@ -147,7 +149,7 @@ analysis.
 #subset the df so that we can perform stats on genome size and mimp/cand eff distribution
 stats_data <- select(metadata, "species", "fsp", "isolate_code","no._mimps","no._cand_effs","genome_size") %>%
 #Rename the columns to reduce the long titles
-  rename(isolate=isolate_code,
+   dplyr::rename(isolate=isolate_code,
          mimps=no._mimps,
          candidate_effectors=no._cand_effs,
          assembly_size =genome_size)
@@ -547,7 +549,7 @@ initially.
 #Extract the isolate, assembly size, total number of mimps and effectors columns.
 stats_plot_data <- select(metadata,"species", "species_group", "fsp", "isolate_code","genome_size","no._mimps","no._cand_effs") %>%
 #Rename the columns to reduce the long titles
-  rename(isolate=isolate_code,                                    
+  dplyr::rename(isolate=isolate_code,                                    
          mimps=no._mimps,
          candidate_effectors=no._cand_effs,
          assembly_size =genome_size) %>%  
@@ -646,7 +648,7 @@ it using `ggplot.`
 #Extract the isolate, assembly size, total number of mimps and effectors coloumns.
 race_plot_data <- select(metadata,"species", "species_group", "fsp", "race" ,"isolate_code","genome_size","no._mimps","no._cand_effs") %>%
 #Rename the columns to reduce the long titles
-  rename(isolate=isolate_code,                                    
+  dplyr::rename(isolate=isolate_code,                                    
          mimps=no._mimps,
          candidate_effectors=no._cand_effs,
          assembly_size =genome_size) %>%  
@@ -770,11 +772,11 @@ phylogeny, I combined the phylogenies and effector profiles to generate
 a heat map. For this, I can use the tree (p4) already generated and add
 the heatmap data I loaded initially (data).
 
-First, I need to prepare the heatmap data. As we are looking at
-clustered (0.65% ID, cd-hit (v…)) and filtered sequences (SignalP
-(v5.06) and EffectorP (v2.0.1) extracted from BLAST hits, the total
-number of candidate effectors per cluster per isolate varies, but I want
-to just look at Presence/. In order to do this, I converted the heatmap
+Now, I need to prepare the heatmap data. As we are looking at clustered
+(0.65% ID, cd-hit (v…)) and filtered sequences (SignalP (v5.06) and
+EffectorP (v2.0.1) extracted from BLAST hits, the total number of
+candidate effectors per cluster per isolate varies, but I want to just
+look at Presence/Absence. In order to do this, I converted the heatmap
 data matrix to a binary data frame.
 
 ``` r
@@ -789,90 +791,19 @@ binary_matrix[binary_matrix > 0] <- 1
 rownames(binary_matrix)<-rownames_mat
 ```
 
-Next, I clustered the data in the binary data matrix, so that it will be
+I clustered the data in the binary data matrix, so that it will be
 ordered when I visualise the candidate effector heatmap.
 
 ``` r
 # ---- Cluster the heatmap data ---- #
 # normalisiation is mandatory for clustering, but as my data is binary - i did not normalise. 
 # Compute hierarchical clustering of columns
-heatmap_dat <- cluster_matrix(binary_matrix, dim = 'col', method ="ward.D2")
+heatmap_dat <- cluster_matrix(binary_matrix, method ="ward.D2")
 ```
 
-Next, in theory, I add the heatmap to the tree already built… but I cant
-get the offsets to align consistently and it overlaps if i just add
-heatmap_dat to p4, so I have to rebuild p4.
+### Summary statistics of candidate effector clusters
 
-``` r
-# ---- Build the full figure ---- #
-p2 <- p +  
-  geom_treescale(x = 0, y = 1, width = 0.004) + 
-  geom_tiplab(aes(label = full_name), offset = 0.0015) +
-  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.05, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "grey20", offset = 0.088, linetype = "blank", geom = "text", align = TRUE)+
-  geom_tippoint(aes(shape = source), size = 3) +
-  geom_rootedge() +
-  theme(legend.position = "bottom")
-
-#add extra scale so we can plot fsp with colour
-p3 <- p2 + new_scale_fill()
-# add race data
-p4 <- gheatmap(p3, fsp_df,
-               offset = 0.04, 
-               width = 0.03,
-               color = "grey20",
-               colnames = FALSE) +
-  scale_fill_manual(name = "Fsp",
-                    values = c("blue","purple","goldenrod4","grey90","gold","brown", "lightpink","darkolivegreen3", "grey20", "tomato", "lavender", "tan", "palegreen4", "coral", "yellow"), na.value = "grey") +
-  theme(legend.position = "bottom",
-        legend.title = element_text(size = 12),
-        legend.text = element_text(size = 12),
-        legend.box = "vertical", legend.margin = margin())+
-  guides(shape = guide_legend(override.aes = list(size = 2)))
-```
-
-    ## Scale for y is already present.
-    ## Adding another scale for y, which will replace the existing scale.
-    ## Scale for fill is already present.
-    ## Adding another scale for fill, which will replace the existing scale.
-
-``` r
-# add extra discrete scale
-p5 <- p4 + new_scale_fill()
-
-# add effector heatmap
-p6 <-gheatmap(p5, heatmap_dat, offset=0.13, colnames=FALSE, legend_title="Presence/\nAbsence", color = "grey",  width = 1.75)  +
-  scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
-                        breaks = c("Absent","Present"),
-                        na.value = "grey")+
-  guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
-  theme(legend.position = "bottom",
-        legend.title = element_blank(),
-        legend.text = element_text(size = 12),
-        legend.box = "horizontal", legend.margin = margin())+
-  guides(shape = guide_legend(override.aes = list(size = 4)))
-```
-
-    ## Scale for y is already present.
-    ## Adding another scale for y, which will replace the existing scale.
-    ## Scale for fill is already present.
-    ## Adding another scale for fill, which will replace the existing scale.
-
-``` r
-plot(p6)
-```
-
-![](AnalysisCandidateEffectorSets_files/figure-gfm/final%20heatmap-1.png)<!-- -->
-
-``` r
-# save the output
-ggsave("HeatmapAndPhylo.png", width = 25, height = 15)
-```
-
-\### Summary statistics of candidate effector clusters
-
-I also wanted to look at the distribution of the these clusters in
+First, I wanted to look at the distribution of the these clusters in
 numerical terms. How many are shared among all assemblies? How many are
 shared among all Fo. assemblies? How many core CECs are there in
 cubense? etc.
@@ -889,7 +820,7 @@ total_CECs <- ncol(heatmap_df)
 # total number of candidate effector clusters per assembly (as a dataframe)
 cluster_distib <- enframe(colSums(t(heatmap_df[-1])))
 #rename the value column 
-cluster_distib <- rename(cluster_distib, no._CECs = value)
+cluster_distib <- dplyr::rename(cluster_distib, no._CECs = value)
 # merge the two data frames
 metadata <- merge(metadata, cluster_distib, by.x = "label", by.y = "name", all.x = TRUE)
 
@@ -955,6 +886,160 @@ knitr::kable(CEC_metadata)
 # summary(CEC_metadata)
 ```
 
+### Build heatmap of CECs
+
+Next, I build the CEC heatmap. I did originally do this alongside the
+TEF phlyo, but it looks messy and unclear, plus you can see the fsp
+clusters more clearly using ComplexHeatmap::pheatmap.
+
+``` r
+# ---- Add metadata to heatmap ---- #
+
+# first, select the data we want from metadata and make the "label column in metadata the row names"
+heatmap_metadf <- select(metadata,"label","no._mimps","no._cand_effs", "no._CECs", "race", "full_name", "isolate_code") %>%
+  dplyr::rename(name=label,
+                Species =full_name,
+                CECs=no._CECs,
+                CEs = no._cand_effs,
+                mimps =no._mimps,) %>% 
+  drop_na(CECs) %>%
+  mutate(across('Species', str_replace, 'F. oxysporum', 'Fo.')) %>% # shorten the species name for Fusarium oxysporum.
+  unite(ID, c(Species, isolate_code), sep = " ", remove = F, na.rm = T) %>%
+  remove_rownames %>% 
+  tibble::column_to_rownames(var="name")
+```
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `across("Species", str_replace, "F. oxysporum", "Fo.")`.
+    ## Caused by warning:
+    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+    ## Supply arguments directly to `.fns` through an anonymous function instead.
+    ## 
+    ##   # Previously
+    ##   across(a:b, mean, na.rm = TRUE)
+    ## 
+    ##   # Now
+    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
+
+``` r
+# because complex heatmap cant cope with the order of the df being different from the matrix, I have to reorder out df to match the matrix.
+heatmap_metadf_ordered<- heatmap_metadf[rownames(binary_matrix), ]
+
+#add isolate ids
+ID <- as.list(heatmap_metadf_ordered$ID)
+
+# ---- set my colours ---- #
+
+anno_colours_r <- list(
+           Species = c(
+             "Fo. fsp. apii" = "blue",
+             "Fo. fsp. cepae" = "purple",
+             "Fo. fsp. conglutinans" = "goldenrod",
+             "Fo. fsp. coriandrii" = "grey90",
+             "Fo. fsp. cubense" = "gold",
+             "Fo. fsp. lactucae" = "darkolivegreen3",
+             "Fo. fsp. lini" = "indianred",
+             "Fo. fsp. lycopersici" = "tomato",
+             "Fo. fsp. matthiolae" = "lavender",
+             "Fo. fsp. narcissus" = "yellow",
+             "Fo. fsp. niveum" = "palegreen4",
+             "Fo. fsp. rapae" = "slateblue",
+             "Fo. fsp. from rocket" = "tan",
+             "Fo. fsp. vasinfectum" = "steelblue",
+             "Fo. fsp. endophyte" = "brown",
+             "F. graminearum" = "burlywood4",
+             "F. sacchari" = "pink",
+             "Fusarium" = "red"),
+           Race = c(
+             "np" = "bisque",
+             "Race 1" = "gold4",
+             "Race 2" = "yellow3",
+             "Race 3" = "lightblue",
+             "Race 4" = "navy",
+             "Tropical Race 4" = "green4"))
+
+anno_colours_cec = colorRamp2(c(0, 150), c("white", "darkorchid4"))
+anno_colours_ce = colorRamp2(c(0, 600), c("white", "darkolivegreen"))
+anno_colours_mimp = colorRamp2(c(0, 800), c("white", "goldenrod1"))
+
+# ---- create heatmap annotations ---- #
+
+# add column barplot
+column_anno = HeatmapAnnotation(
+  "CEC size" = anno_barplot(colSums(binary_matrix), 
+                            outline = FALSE, 
+                            gp = gpar(fill = "black")))
+
+#add row data - CEC, CE and mimp count.
+row_anno_l <- rowAnnotation(
+  "Total CECs" = heatmap_metadf_ordered$CECs, 
+  "Total CEs" = heatmap_metadf_ordered$CEs,
+  "Total mimps" = heatmap_metadf_ordered$mimps,
+  col = list("Total CECs" = anno_colours_cec,
+             "Total CEs" = anno_colours_ce,
+             "Total mimps" = anno_colours_mimp),
+  gp = gpar(col = "white")
+)
+
+
+row_anno_r = rowAnnotation(
+  "Species" = heatmap_metadf_ordered$Species, 
+  "Race" = heatmap_metadf_ordered$race, 
+  col = anno_colours_r, 
+  na_col = NA, 
+  gp = gpar(col = "white"))
+ 
+# ---- pheatmap plot of CECs ---- #
+
+effector_heatmap <- ComplexHeatmap::pheatmap(
+  binary_matrix, 
+  color = colorRampPalette(c("grey90", "black"))(2), 
+  name = "Binary distribution",
+  legend = T,
+  heatmap_legend_param = list(
+    #at = seq(1, 10, by = 1),  #wär gleich: at = 1:10,       
+    at = 0:1,
+    legend_gp = gpar(fill = 0:1, fontsize = 2),
+    color_bar = "discrete"
+  ),
+  legend_labels = c("Absent", "Present"),
+  show_colnames = F,
+  clustering_distance_rows = "binary",
+  clustering_distance_cols = "binary",
+  #cellwidth = 2, 
+  #cellheight = 20,
+  border_color = NA,
+  treeheight_row = 80,
+  treeheight_col = 20,
+  na_col = "white", 
+  row_labels = ID,
+  row_names_side = "right",
+  top_annotation = column_anno,
+  left_annotation = row_anno_l,
+  right_annotation = row_anno_r,
+  fontsize = 12
+)
+
+# add bar plot annotations
+effector_heatmap 
+```
+
+![](AnalysisCandidateEffectorSets_files/figure-gfm/final%20heatmap-1.png)<!-- -->
+
+``` r
+#save it
+png(file="EffectorsHeatmap.png", width = 24, height = 12, unit = "in", res = 150)
+draw(effector_heatmap)
+dev.off()
+```
+
+    ## quartz_off_screen 
+    ##                 2
+
+As well as plotting the CEC distribution, I also want to get a numerical
+overview. First, I looked at the overall distribution and summary
+statistics of CECs.
+
 ``` r
 # ---- candidate effector clusters in Fo ---- #
 
@@ -988,6 +1073,12 @@ summary(Fo_CEC_medtadata)
     ##  3rd Qu.: 87.00  
     ##  Max.   :106.00  
     ##  NA's   :1
+
+The number of CECs in Fo. only doesn’t vary as widely as the number of
+CECs across all Fusarium assemblies included (see range).
+
+Next, I looked at specific fsp. of interest as well as comparing the *F.
+sacchari* genome assemblies.
 
 ``` r
 # ---- candidate effector clusters in fsp ---- #
@@ -1136,6 +1227,12 @@ summary(Fs_CEC_medtadata)
     ##  3rd Qu.:13.5  
     ##  Max.   :15.0
 
+#### Core CEC distribution
+
+I also wanted to know what CECs were shared among all assemblies, and
+which were shared among all Fo. and which were shared among all
+assemblies in a specific fsp.
+
 ``` r
 # ---- summarise the distribution of candidate effector clusters in all assemblies  ---- #
 
@@ -1246,7 +1343,7 @@ ncol(heatmap_Fs_shared)
 
     ## [1] 9
 
-#### Are the ‘core CECs’ in Fs also found in Focub?
+Are the ‘core CECs’ in Fs also found in Focub?
 
 ``` r
 # ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
@@ -1262,7 +1359,7 @@ ncol(heatmap_banana_shared)
 
     ## [1] 4
 
-### Distribution of CECs among races
+How are CECs distributed among races?
 
 ``` r
 # ---- subset the fsp of interest ---- #
@@ -1320,11 +1417,12 @@ knitr::kable(foa_CEC_stats_sum)
 ### Candidate effector cluster distribution in Fo. fsp. cubense
 
 Now I have my overall heatmap, I want to look at some of the fsp in more
-detail - particularly those for which we have multiple races available.
-I subset my metadata, searched for all caseses that did not match the
-regex “Fo.\_fsp.\_cubense” and dropped them from the tree using the
-`drop.tip` function. I the reconstructed my tree using just the Foc tef
-phylo and foc effector profiles.
+detail, including the TEF phylogeny data - particularly those for which
+we have multiple races available. I subset my metadata, searched for all
+cases that did not match the regex “Fo.\_fsp.\_cubense” and dropped them
+from the tree using the `drop.tip` function. I the reconstructed my tree
+using just the Foc tef phylo and foc effector profiles using the
+gheatmap package from ggtree.
 
 ``` r
 # ---- subset foc metadata ---- #
@@ -1368,7 +1466,7 @@ foc_tree_3 <- foc_tree_2 + new_scale_fill()
 # add race data
 foc_tree_4 <- gheatmap(foc_tree_3, foc_heat_df, offset=0.008, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
+                        low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
                         na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
@@ -1463,9 +1561,9 @@ foa_c_tree_3 <- foa_c_tree_2 + new_scale_fill()
 # add race data
 foa_c_tree_4 <- gheatmap(foa_c_tree_3, foa_c_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
+                        low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
-                        na.value = "grey")+
+                        na.value = "white")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),
@@ -1548,9 +1646,9 @@ fola_tree_3 <- fola_tree_2 + new_scale_fill()
 # add race data
 fola_tree_4 <- gheatmap(fola_tree_3, fola_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "white", high = "black",
+                        low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
-                        na.value = "grey") +
+                        na.value = "white") +
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1)) +
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),
@@ -1604,44 +1702,51 @@ session_data
     ## tzcode source: internal
     ## 
     ## attached base packages:
-    ## [1] stats     graphics  grDevices utils     datasets  methods   base     
+    ## [1] grid      stats     graphics  grDevices utils     datasets  methods  
+    ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] pheatmap_1.0.12    ggnewscale_0.4.9   RColorBrewer_1.1-3 textshape_1.7.3   
-    ##  [5] ggtreeExtra_1.13.0 ggtree_3.10.0      phytools_2.1-1     maps_3.4.2        
-    ##  [9] ape_5.7-1          nortest_1.0-4      ggpubr_0.6.0       viridis_0.6.5     
-    ## [13] viridisLite_0.4.2  ggthemes_5.0.0     lubridate_1.9.3    forcats_1.0.0     
-    ## [17] stringr_1.5.1      purrr_1.0.2        readr_2.1.5        tibble_3.2.1      
-    ## [21] ggplot2_3.4.4      tidyverse_2.0.0    tidytree_0.4.6     tidyr_1.3.1       
-    ## [25] dplyr_1.1.4       
+    ##  [1] circlize_0.4.15       pheatmap_1.0.12       ggnewscale_0.4.9     
+    ##  [4] RColorBrewer_1.1-3    textshape_1.7.3       ComplexHeatmap_2.15.4
+    ##  [7] ggtreeExtra_1.13.0    ggtree_3.10.0         phytools_2.1-1       
+    ## [10] maps_3.4.2            ape_5.7-1             nortest_1.0-4        
+    ## [13] ggpubr_0.6.0          viridis_0.6.5         viridisLite_0.4.2    
+    ## [16] ggthemes_5.0.0        lubridate_1.9.3       forcats_1.0.0        
+    ## [19] stringr_1.5.1         purrr_1.0.2           readr_2.1.5          
+    ## [22] tibble_3.2.1          ggplot2_3.4.4         tidyverse_2.0.0      
+    ## [25] tidytree_0.4.6        tidyr_1.3.1           dplyr_1.1.4          
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] mnormt_2.1.1            gridExtra_2.3           phangorn_2.11.1        
-    ##  [4] rlang_1.1.3             magrittr_2.0.3          compiler_4.3.1         
-    ##  [7] mgcv_1.9-1              systemfonts_1.0.5       vctrs_0.6.5            
-    ## [10] combinat_0.0-8          quadprog_1.5-8          pkgconfig_2.0.3        
-    ## [13] fastmap_1.1.1           backports_1.4.1         labeling_0.4.3         
-    ## [16] utf8_1.2.4              rmarkdown_2.25          tzdb_0.4.0             
-    ## [19] ragg_1.2.7              xfun_0.41               cachem_1.0.8           
-    ## [22] aplot_0.2.2             clusterGeneration_1.3.8 jsonlite_1.8.8         
-    ## [25] highr_0.10              broom_1.0.5             parallel_4.3.1         
-    ## [28] R6_2.5.1                stringi_1.8.3           car_3.1-2              
-    ## [31] numDeriv_2016.8-1.1     Rcpp_1.0.12             iterators_1.0.14       
-    ## [34] knitr_1.45              optimParallel_1.0-2     splines_4.3.1          
-    ## [37] Matrix_1.6-5            igraph_1.5.1            timechange_0.3.0       
-    ## [40] tidyselect_1.2.0        rstudioapi_0.15.0       abind_1.4-5            
-    ## [43] yaml_2.3.8              doParallel_1.0.17       codetools_0.2-19       
-    ## [46] lattice_0.22-5          treeio_1.26.0           withr_3.0.0            
-    ## [49] coda_0.19-4             evaluate_0.23           gridGraphics_0.5-1     
-    ## [52] pillar_1.9.0            carData_3.0-5           foreach_1.5.2          
-    ## [55] ggfun_0.1.4             generics_0.1.3          hms_1.1.3              
-    ## [58] munsell_0.5.0           scales_1.3.0            glue_1.7.0             
-    ## [61] scatterplot3d_0.3-44    lazyeval_0.2.2          tools_4.3.1            
-    ## [64] data.table_1.15.0       ggsignif_0.6.4          fs_1.6.3               
-    ## [67] cowplot_1.1.3           fastmatch_1.1-4         grid_4.3.1             
-    ## [70] colorspace_2.1-0        nlme_3.1-164            patchwork_1.2.0        
-    ## [73] cli_3.6.2               textshaping_0.3.7       fansi_1.0.6            
-    ## [76] expm_0.999-9            gtable_0.3.4            rstatix_0.7.2          
-    ## [79] yulab.utils_0.1.4       digest_0.6.34           ggplotify_0.1.2        
-    ## [82] farver_2.1.1            memoise_2.0.1           htmltools_0.5.7        
-    ## [85] lifecycle_1.0.4         MASS_7.3-60.0.1
+    ##  [4] rlang_1.1.3             magrittr_2.0.3          clue_0.3-65            
+    ##  [7] GetoptLong_1.0.5        matrixStats_1.2.0       compiler_4.3.1         
+    ## [10] mgcv_1.9-1              systemfonts_1.0.5       png_0.1-8              
+    ## [13] vctrs_0.6.5             combinat_0.0-8          quadprog_1.5-8         
+    ## [16] shape_1.4.6             pkgconfig_2.0.3         crayon_1.5.2           
+    ## [19] fastmap_1.1.1           magick_2.8.2            backports_1.4.1        
+    ## [22] labeling_0.4.3          utf8_1.2.4              rmarkdown_2.25         
+    ## [25] tzdb_0.4.0              ragg_1.2.7              xfun_0.41              
+    ## [28] cachem_1.0.8            aplot_0.2.2             clusterGeneration_1.3.8
+    ## [31] jsonlite_1.8.8          highr_0.10              cluster_2.1.6          
+    ## [34] broom_1.0.5             parallel_4.3.1          R6_2.5.1               
+    ## [37] stringi_1.8.3           car_3.1-2               numDeriv_2016.8-1.1    
+    ## [40] Rcpp_1.0.12             iterators_1.0.14        knitr_1.45             
+    ## [43] optimParallel_1.0-2     IRanges_2.36.0          splines_4.3.1          
+    ## [46] Matrix_1.6-5            igraph_1.5.1            timechange_0.3.0       
+    ## [49] tidyselect_1.2.0        rstudioapi_0.15.0       abind_1.4-5            
+    ## [52] yaml_2.3.8              doParallel_1.0.17       codetools_0.2-19       
+    ## [55] lattice_0.22-5          treeio_1.26.0           withr_3.0.0            
+    ## [58] coda_0.19-4             evaluate_0.23           gridGraphics_0.5-1     
+    ## [61] pillar_1.9.0            carData_3.0-5           stats4_4.3.1           
+    ## [64] foreach_1.5.2           ggfun_0.1.4             generics_0.1.3         
+    ## [67] hms_1.1.3               S4Vectors_0.40.2        munsell_0.5.0          
+    ## [70] scales_1.3.0            glue_1.7.0              scatterplot3d_0.3-44   
+    ## [73] lazyeval_0.2.2          tools_4.3.1             data.table_1.15.0      
+    ## [76] ggsignif_0.6.4          fs_1.6.3                cowplot_1.1.3          
+    ## [79] fastmatch_1.1-4         colorspace_2.1-0        nlme_3.1-164           
+    ## [82] patchwork_1.2.0         cli_3.6.2               textshaping_0.3.7      
+    ## [85] fansi_1.0.6             expm_0.999-9            gtable_0.3.4           
+    ## [88] rstatix_0.7.2           yulab.utils_0.1.4       digest_0.6.34          
+    ## [91] BiocGenerics_0.48.1     ggplotify_0.1.2         farver_2.1.1           
+    ## [94] rjson_0.2.21            memoise_2.0.1           htmltools_0.5.7        
+    ## [97] lifecycle_1.0.4         GlobalOptions_0.1.2     MASS_7.3-60.0.1
