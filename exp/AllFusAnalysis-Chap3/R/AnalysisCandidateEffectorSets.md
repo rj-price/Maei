@@ -14,7 +14,7 @@ scripts and analysis, see
 # ---- Set dirs and load files ---- #
 setwd("/Volumes/Jamie_EXT/Projects/Maei/exp/AllFusAnalysis-Chap3/R/")
 # Specify  path to  Newick file
-tree_file <- "./MaeiTEFPhylo.treefile"
+tree_file <- "MaeiTEFPhylo.phylo2.treefile"
 # Load heatmap data matrix from the CSV file
 data <- read.csv("./PhyloHeatmapData.csv")  # Adjust the path accordingly
 # Load phylogeny meta date from the CSV file
@@ -39,8 +39,12 @@ metadata$race[metadata$race==""] <- NA # set empty cells in race column to NA
 #create a column for full fsp.
 metadata <- metadata %>% unite("full_name", c(species,fsp), sep = " fsp. ", remove = F, na.rm = T)
 
+#create a column for full fsp and isolate code
+metadata <- metadata %>% unite("full_ID", c(full_name,isolate_code), sep = " ", remove = F, na.rm = T)
+
+
 # build df for fsp so we can add it as a colour scale to the tree
-fsp_df <- data.frame("fsp" = metadata[,c("fsp")] )
+fsp_df <- data.frame("full_name" = metadata[,c("full_name")] )
 rownames(fsp_df) <- metadata$label
 ```
 
@@ -56,17 +60,29 @@ nodes labeled, so that I can use that for later reference
 ``` r
 # ---- Prepare the tree ---- #
 # Read the phylogenetic tree from the Newick file
-unrootedtree <- read.tree(tree_file)
+unrootedtree <- read.newick(tree_file, node.label='label' )
 # root the tree
 tree <- root(unrootedtree, outgroup = c("F._graminearum_PH-1"))
-# Build tree skeleton
-p <- ggtree(tree,ladderize = F)  %<+% metadata
+
+# Identify the node number of "F._graminearum_PH-1"
+node_number <- which(tree$tip.label == "F._graminearum_PH-1")
+# Trim the F._graminearum_PH-1 branch
+m <- MRCA(tree, 48)
+tree_with_group <- groupClade(tree, m)
+
+# ---- Build tree skeleton ---- #
+p <- ggtree(tree, ladderize = T)  %<+% metadata
+
+# Adjust the branch length for "F._graminearum_PH-1"
+p$data[p$data$node %in% node_number, "x"] <- mean(p$data$x)
 
 # ---- View the tree ---- #
 # Useful for visualusing nodes etc 
 p_nodes <- p + 
   geom_text2(aes(label = parent), hjust = -0.1, size = 3)+ # add node names
   geom_tiplab(aes(label = label), offset = 0.005) +
+  geom_cladelabel(node=node_number, label="Adjusted by: 0.03", 
+                  color='black') +
   coord_cartesian(clip = "off") # stop names being trimmed off
 ```
 
@@ -77,36 +93,38 @@ race).
 ``` r
 # ---- Build the tree plot ---- #
 
-p2 <- p +  
-  geom_treescale(x = 0, y = 1, width = 0.004) + 
-  geom_tiplab(aes(label = full_name)) +
-  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.015, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "grey20", offset = 0.024, linetype = "blank", geom = "text", align = TRUE)+
-  geom_tippoint(aes(shape = source)) +
-  geom_rootedge() +
-  theme(legend.position = "bottom")
+p1 <- p +
+  xlim(0,0.045)
 
-#add extra scale so we can plot fsp with colour
+p2 <- p + 
+  geom_highlight(node = 88, fill = "mistyrose") + # colour the Fs node
+  geom_highlight(node= 49, fill = "lemonchiffon1" ) + # colour the fo node
+  geom_treescale(x = 0, y = 1, width = 0.004) + 
+  geom_tiplab(aes(label = full_ID), offset = 0.0004) +
+ # geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0045, linetype = "blank", geom = "text", align = TRUE) +
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.012, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
+  geom_tippoint(aes(shape = source), size = 2.5) +
+  geom_rootedge() +
+  theme(legend.position = "bottom" ) +
+  geom_cladelabel(node=node_number, label="Adjusted by: 0.03", offset = 0.008, color='black') + geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 60), nudge_x = -0.0012, nudge_y = -0.25) 
+
+# Add extra scale so we can plot fsp with colour
 p3 <- p2 + new_scale_fill()
+
 # add race data
 p4 <- gheatmap(p3, fsp_df,
-               offset = 0.008, 
+               offset = 0.012, 
                width = 0.03,
                color = "grey20",
                colnames = FALSE) +
-  scale_fill_manual(name = "Fsp",
-                    values = c("blue","purple","goldenrod4","grey90","gold","brown", "lightpink","darkolivegreen3", "grey20", "tomato", "lavender", "tan", "palegreen4", "coral", "yellow"), na.value = "grey") +
+  scale_fill_manual(name = "Forma specialis",
+                    values = c( "burlywood4", "grey","blue","purple","goldenrod","grey90","gold","brown", "tan","darkolivegreen3", "indianred", "tomato", "lavender", "yellow", "palegreen4", "slateblue", "steelblue", "pink", "red"), na.value = "grey") +
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),
-        legend.text = element_text(size = 12),
+        legend.text = element_text(size = 9),
         legend.box = "vertical", legend.margin = margin())+
-  guides(shape = guide_legend(override.aes = list(size = 2)))
+  guides(shape = guide_legend(override.aes = list(size = 5))) 
 ```
-
-    ## Scale for y is already present.
-    ## Adding another scale for y, which will replace the existing scale.
-    ## Scale for fill is already present.
-    ## Adding another scale for fill, which will replace the existing scale.
 
 The TR4 isolates group into a monophyletic clade, as expected; as do the
 *lactucae* isolates. The TNAU isolates group as they did in the previous
@@ -130,7 +148,7 @@ graminearum.</figcaption>
 
 ``` r
 ##save basic tree 
-ggsave("BasicTEFPhylo.png", width = 30, height = 15)
+ggsave("BasicTEFPhylo.png", width = 12, height = 20)
 ```
 
 ## Analysis of candidate effectors, *mimps* and genome size in data set
@@ -242,27 +260,27 @@ foc_stats <- subset(metadata, grepl("Fo._fsp._cubense", label))
 summary(foc_stats)
 ```
 
-    ##     label            full_name           species          species_group     
+    ##     label             full_ID           full_name           species         
     ##  Length:14          Length:14          Length:14          Length:14         
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##      fsp            isolate_code           race              source         
+    ##  species_group          fsp            isolate_code           race          
     ##  Length:14          Length:14          Length:14          Length:14         
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##    no._mimps     no._cand_effs     genome_size   
-    ##  Min.   : 39.0   Min.   : 45.00   Min.   :46.30  
-    ##  1st Qu.:138.0   1st Qu.: 52.50   1st Qu.:46.62  
-    ##  Median :145.5   Median : 66.50   Median :47.95  
-    ##  Mean   :137.4   Mean   : 75.43   Mean   :48.26  
-    ##  3rd Qu.:157.2   3rd Qu.:101.75   3rd Qu.:49.27  
-    ##  Max.   :183.0   Max.   :127.00   Max.   :52.90
+    ##     source            no._mimps     no._cand_effs     genome_size   
+    ##  Length:14          Min.   : 39.0   Min.   : 45.00   Min.   :46.30  
+    ##  Class :character   1st Qu.:138.0   1st Qu.: 52.50   1st Qu.:46.62  
+    ##  Mode  :character   Median :145.5   Median : 66.50   Median :47.95  
+    ##                     Mean   :137.4   Mean   : 75.43   Mean   :48.26  
+    ##                     3rd Qu.:157.2   3rd Qu.:101.75   3rd Qu.:49.27  
+    ##                     Max.   :183.0   Max.   :127.00   Max.   :52.90
 
 ``` r
 # lactucae
@@ -270,27 +288,27 @@ fola_stats <- subset(metadata, grepl("Fo._fsp._lactucae", label))
 summary(fola_stats)
 ```
 
-    ##     label            full_name           species          species_group     
+    ##     label             full_ID           full_name           species         
     ##  Length:6           Length:6           Length:6           Length:6          
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##      fsp            isolate_code           race              source         
+    ##  species_group          fsp            isolate_code           race          
     ##  Length:6           Length:6           Length:6           Length:6          
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##    no._mimps     no._cand_effs    genome_size   
-    ##  Min.   :522.0   Min.   :260.0   Min.   :62.10  
-    ##  1st Qu.:533.8   1st Qu.:307.8   1st Qu.:62.33  
-    ##  Median :552.5   Median :412.5   Median :64.35  
-    ##  Mean   :564.8   Mean   :403.2   Mean   :64.67  
-    ##  3rd Qu.:602.8   3rd Qu.:488.0   3rd Qu.:66.15  
-    ##  Max.   :615.0   Max.   :548.0   Max.   :68.80
+    ##     source            no._mimps     no._cand_effs    genome_size   
+    ##  Length:6           Min.   :522.0   Min.   :260.0   Min.   :62.10  
+    ##  Class :character   1st Qu.:533.8   1st Qu.:307.8   1st Qu.:62.33  
+    ##  Mode  :character   Median :552.5   Median :412.5   Median :64.35  
+    ##                     Mean   :564.8   Mean   :403.2   Mean   :64.67  
+    ##                     3rd Qu.:602.8   3rd Qu.:488.0   3rd Qu.:66.15  
+    ##                     Max.   :615.0   Max.   :548.0   Max.   :68.80
 
 ``` r
 # apii 
@@ -298,27 +316,27 @@ foa_stats <- subset(metadata, grepl("Fo._fsp._apii", label))
 summary(foa_stats)
 ```
 
-    ##     label            full_name           species          species_group     
+    ##     label             full_ID           full_name           species         
     ##  Length:5           Length:5           Length:5           Length:5          
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##      fsp            isolate_code           race              source         
+    ##  species_group          fsp            isolate_code           race          
     ##  Length:5           Length:5           Length:5           Length:5          
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##    no._mimps     no._cand_effs    genome_size  
-    ##  Min.   :210.0   Min.   :328.0   Min.   :64.6  
-    ##  1st Qu.:217.0   1st Qu.:332.0   1st Qu.:64.6  
-    ##  Median :420.0   Median :357.0   Median :64.7  
-    ##  Mean   :365.6   Mean   :360.8   Mean   :65.3  
-    ##  3rd Qu.:442.0   3rd Qu.:388.0   3rd Qu.:65.3  
-    ##  Max.   :539.0   Max.   :399.0   Max.   :67.3
+    ##     source            no._mimps     no._cand_effs    genome_size  
+    ##  Length:5           Min.   :210.0   Min.   :328.0   Min.   :64.6  
+    ##  Class :character   1st Qu.:217.0   1st Qu.:332.0   1st Qu.:64.6  
+    ##  Mode  :character   Median :420.0   Median :357.0   Median :64.7  
+    ##                     Mean   :365.6   Mean   :360.8   Mean   :65.3  
+    ##                     3rd Qu.:442.0   3rd Qu.:388.0   3rd Qu.:65.3  
+    ##                     Max.   :539.0   Max.   :399.0   Max.   :67.3
 
 ``` r
 # coriandrii
@@ -328,27 +346,27 @@ foci_stats <- foci_stats %>%
 summary(foci_stats)
 ```
 
-    ##     label            full_name           species          species_group     
+    ##     label             full_ID           full_name           species         
     ##  Length:2           Length:2           Length:2           Length:2          
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##      fsp            isolate_code           race              source         
+    ##  species_group          fsp            isolate_code           race          
     ##  Length:2           Length:2           Length:2           Length:2          
     ##  Class :character   Class :character   Class :character   Class :character  
     ##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
     ##                                                                             
     ##                                                                             
     ##                                                                             
-    ##    no._mimps     no._cand_effs  genome_size   
-    ##  Min.   :478.0   Min.   :315   Min.   :65.40  
-    ##  1st Qu.:527.2   1st Qu.:387   1st Qu.:66.38  
-    ##  Median :576.5   Median :459   Median :67.35  
-    ##  Mean   :576.5   Mean   :459   Mean   :67.35  
-    ##  3rd Qu.:625.8   3rd Qu.:531   3rd Qu.:68.33  
-    ##  Max.   :675.0   Max.   :603   Max.   :69.30
+    ##     source            no._mimps     no._cand_effs  genome_size   
+    ##  Length:2           Min.   :478.0   Min.   :315   Min.   :65.40  
+    ##  Class :character   1st Qu.:527.2   1st Qu.:387   1st Qu.:66.38  
+    ##  Mode  :character   Median :576.5   Median :459   Median :67.35  
+    ##                     Mean   :576.5   Mean   :459   Mean   :67.35  
+    ##                     3rd Qu.:625.8   3rd Qu.:531   3rd Qu.:68.33  
+    ##                     Max.   :675.0   Max.   :603   Max.   :69.30
 
 ### Correlation and distribution
 
@@ -415,16 +433,7 @@ mimps_v_assembly_size_relat <- ggplot(stats_data) +
 sats_plots <- ggarrange(mimps_histo, cands_histo, size_histo, mimps_v_assembly_size_relat, effectors_v_assembly_size_relat, effectors_v_mimps_relat,
           ncol = 3, 
           nrow = 2)
-```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-    ## `geom_smooth()` using formula = 'y ~ x'
-    ## `geom_smooth()` using formula = 'y ~ x'
-    ## `geom_smooth()` using formula = 'y ~ x'
-
-``` r
 # plot the combined plots
 plot(sats_plots)
 ```
@@ -638,6 +647,18 @@ fewer identified. Further, I wondered if there was a difference in the
 number of *mimps* and candidate effectors between different races of the
 same fsp, even if it was not signifcant.
 
+I think it is interesting, though we cannot do any really significant
+stats on this, to look at candidate effector and mimp content among the
+race groups.
+
+I was expecting to see a fairly similar number of mimps and candidate
+effectors among the TR4 isolates, as they are from a monophyletic clade
+in tef and rbp2 phylos, but number of candidates varies. I am thinking
+it may be due to assembly quality too? Looking at the Foa isolates is a
+good way to do this, as the R4 and R2 assemblies are from the same
+isolates but diff versions prepared by diff people using different
+methods.
+
 I plotted the mimp and effector content from the metadata and visualised
 it using `ggplot.`
 
@@ -683,7 +704,7 @@ mimpsandcandeffs <- ggplot(race_plot_data_subset, aes(x=race, y=mimps_and_candid
   theme(strip.text.y = element_blank(),  # remove the side names as we have this shown in colour now. 
         panel.grid.major = element_blank(), # put the lines back in 
         legend.position = "bottom", 
-        legend.title = element_blank()) 
+        legend.title = element_blank())
 
 #plot it 
 plot(mimpsandcandeffs)
@@ -896,22 +917,7 @@ CEC_sizes <- CEC_df_all %>%
   mutate(across(starts_with("Cluster"),
               ~ as.numeric(as.character(.)))) %>% 
   summarize(across(starts_with("Cluster"), sum, na.rm = TRUE))
-```
 
-    ## Warning: There was 1 warning in `summarize()`.
-    ## ℹ In argument: `across(starts_with("Cluster"), sum, na.rm = TRUE)`.
-    ## ℹ In group 1: `full_name = "F. graminearum"`.
-    ## Caused by warning:
-    ## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
-    ## Supply arguments directly to `.fns` through an anonymous function instead.
-    ## 
-    ##   # Previously
-    ##   across(a:b, mean, na.rm = TRUE)
-    ## 
-    ##   # Now
-    ##   across(a:b, \(x) mean(x, na.rm = TRUE))
-
-``` r
 # use the CEC_sizes output to find the range for each fsp (highest number of CEs in a CEC and lowest number of CEs in a CEC, not counting 0)
 CEC_ranges <- CEC_sizes %>%
   pivot_longer(cols = starts_with("Cluster"), names_to = "column") %>%
@@ -1001,7 +1007,7 @@ CEC_count <- CEC_df_all %>%
 # Calculate mean and standard deviation for normal distribution
 CEC_mean_value <- mean(CEC_count$Count)
 CEC_sd_value <- sd(CEC_count$Count)
-
+CEC_range_value <- range(CEC_count$Count)
 
 # ---- plot the CEC counts ---- #
 CEC_count_plot <- ggplot(CEC_count, aes(x = Count)) +
@@ -1418,6 +1424,12 @@ ncol(heatmap_Fola_shared)
 
     ## [1] 56
 
+As apii and coriandrii are have similar genomes, and apii r4 can infect
+coriander, I want to examine their shared CECs more closely.
+
+First, how many core CECs in apii, how many core CECs shared between
+apii R3 and R4 and what are the CECs that are not shared?
+
 ``` r
 # ---- summarise the distribution of candidate effector clusters in apii ---- #
 
@@ -1433,6 +1445,32 @@ ncol(heatmap_Foa_shared)
     ## [1] 54
 
 ``` r
+# ---- summarise the distribution of candidate effector clusters in apii R3 and R4 (not R2)---- #
+
+# subset only the Foa rows
+heatmap_Foa_r3r4_only <- subset(CEC_binary_df, grepl("^Fo._fsp._apii_274.AC|^Fo._fsp._apii_AJ498|^Fo._fsp._apii_NRRL38295", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foa_r3r4_only_shared <- heatmap_Foa_r3r4_only %>%
+  select_if(colSums(heatmap_Foa_r3r4_only) >= nrow(heatmap_Foa_r3r4_only))
+# count the number of columns 
+ncol(heatmap_Foa_r3r4_only_shared)
+```
+
+    ## [1] 85
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foa race 3/race4 specific matrix
+heatmap_Foa_r3r4_only_drop_0 <- heatmap_Foa_r3r4_only[, colSums(heatmap_Foa_r3r4_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Foa_r3r4_only_drop_0), names(heatmap_Foa_r3r4_only_shared))
+```
+
+Next, I want to look at coriandrii alone. How many core CECs between
+coriandrii and how many core CECs when you include apii?
+
+``` cec
+
 # ---- summarise the distribution of candidate effector clusters in coriandrii ---- #
 
 # subset only the Foci rows
@@ -1442,11 +1480,7 @@ heatmap_Foci_shared <- heatmap_Foci_only %>%
   select_if(colSums(heatmap_Foci_only) >= nrow(heatmap_Foci_only))
 # count the number of columns 
 ncol(heatmap_Foci_shared)
-```
 
-    ## [1] 64
-
-``` r
 # ---- summarise the distribution of candidate effector clusters in apii and coridanrii (as they share some hosts) ---- #
 
 # subset only the Foa and Foci rows
@@ -1458,7 +1492,56 @@ heatmap_Foa_c_shared <- heatmap_Foa_c_only %>%
 ncol(heatmap_Foa_c_shared)
 ```
 
-    ## [1] 48
+Knowing that coriandrii 3-2 and apii race 3 and race 4 are closely
+related and have a similar CEC profile, how many CECs are shared between
+just these isolates
+
+``` r
+# ---- Foa monophyletic group CEC counts ---- #
+# subset only the Foa rows
+heatmap_Foa_r3r4_andcorr_only <- subset(CEC_binary_df, grepl("^Fo._fsp._apii_274.AC|^Fo._fsp._apii_AJ498|^Fo._fsp._apii_NRRL38295|Fo._fsp._coriandrii_3-2", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foa_r3r4_andcorr_only_shared <- heatmap_Foa_r3r4_andcorr_only %>%
+  select_if(colSums(heatmap_Foa_r3r4_andcorr_only) >= nrow(heatmap_Foa_r3r4_andcorr_only))
+# count the number of columns 
+ncol(heatmap_Foa_r3r4_andcorr_only_shared)
+```
+
+    ## [1] 73
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foa race 3/race4 specific matrix
+heatmap_Foa_r3r4_andcorr_only_drop_0 <- heatmap_Foa_r3r4_andcorr_only[, colSums(heatmap_Foa_r3r4_andcorr_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Foa_r3r4_andcorr_only_drop_0), names(heatmap_Foa_r3r4_andcorr_only_shared))
+```
+
+What about apii R2 and the other coriandrii isolate?
+
+``` r
+# ---- Foa monophyletic group CEC counts ---- #
+# subset only the Foa rows
+heatmap_Foa_r2_and_corr_only <- subset(CEC_binary_df, grepl("^Fo._fsp._apii_207.A|^Fo._fsp._apii_AJ720|Fo._fsp._coriandrii_AJ615", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foa_r2_and_corr_only_shared <- heatmap_Foa_r2_and_corr_only %>%
+  select_if(colSums(heatmap_Foa_r2_and_corr_only) >= nrow(heatmap_Foa_r2_and_corr_only))
+# count the number of columns 
+ncol(heatmap_Foa_r2_and_corr_only_shared)
+```
+
+    ## [1] 67
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foa race 3/race4 specific matrix
+heatmap_Foa_r2_and_corr_only_drop_0 <- heatmap_Foa_r2_and_corr_only[, colSums(heatmap_Foa_r2_and_corr_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Foa_r2_and_corr_only_drop_0), names(heatmap_Foa_r2_and_corr_only_shared))
+```
+
+Next, how many CECs are shared among all of the Fs and Fusarium from
+TNAU.
 
 ``` r
 # ---- summarise the distribution of candidate effector clusters in F. sacchari and SY-2) ---- #
@@ -1558,18 +1641,24 @@ gheatmap package from ggtree.
 ``` r
 # ---- subset foc metadata ---- #
 #identify all rows in the metadata which do not contain cubense 
-foc_set_df <- subset(metadata, !grepl("Fo._fsp._cubense|Fo._Fo47", label))
+foc_set_df <- subset(metadata, !grepl("Fo._fsp._cubense|F._sacchari|SY-2|Fo47", label))
 #subset just tip labels
 foc_set <- data.frame("label" = foc_set_df[,c("label")])
 # convert it to a list 
 foc_set_2 <- paste(foc_set$label, sep = ",")
 
+# subset race data
+foc_set_df_race <- data.frame("race" = metadata[,c("race")] )
+rownames(foc_set_df_race) <- metadata$label
+
 # ---- subset foc heatmap data ---- #
 # reduce the white space in the heatmap but filtering columns where there is no data for foc
 # first we extract only the foc rows using the same approach as for the metadata, but instead we perform on the binary matrix
-foc_heat_df <- subset(binary_matrix, grepl("Fo._fsp._cubense|Fo._Fo47", rownames(binary_matrix)))
+foc_heat_df <- subset(binary_matrix, grepl("Fo._fsp._cubense|F._sacchari|SY-2|Fo47", rownames(binary_matrix)))
 # now we need to drop the empty columns 
 foc_heat_df <- foc_heat_df[, colSums(foc_heat_df != 0) > 0]
+
+node_data <- data.frame(node=c(20, 34), type=c("FOSC", "FSSC"))
 
 # ---- Cluster the heatmap data (again)---- #
 # normalisiation is mandatory for clustering, but as my data is binary - i did not normalise. 
@@ -1585,17 +1674,38 @@ foc_tree <- ggtree(tree_reduced, ladderize = T ) %<+% metadata
 # ---- build full foc specific tree ---- #
 # now make the tree pretty 
 foc_tree_2 <- foc_tree +  
-  #geom_tiplab(aes(label = full_name), offset = 0.00001) +
-  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0003, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), offset = 0.0038, linetype = "blank", geom = "text", align = TRUE)+
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0018, linetype = "blank", geom = "text", align = T) +
+  geom_hilight(node=20, fill="gold") +
+  geom_hilight(node=34, fill="lightpink") +
   geom_tippoint(aes(shape = source), size = 3) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 80), nudge_x = -0.0027) +
   geom_rootedge() +
   theme(legend.position = "bottom")
 
-#add extra scale so we can plot fsp with colour
+# ---- add race data ---- #
+#add extra scale so we can plot race with colour
 foc_tree_3 <- foc_tree_2 + new_scale_fill()
-# add race data
-foc_tree_4 <- gheatmap(foc_tree_3, foc_heat_df, offset=0.008, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
+
+foc_tree_4 <- gheatmap(foc_tree_3, foc_set_df_race, 
+               offset = 0.015, 
+               width = 0.06,
+               color = "grey",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Race",
+                    values = c("bisque","gold4", "green4"), na.value = "white") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.box = "horizontal", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 2)))
+
+# ---- add candidate effector clusters ---- #
+
+# add add scale for candidate effector clusters
+foc_tree_5 <- foc_tree_4 + new_scale_fill()
+
+# plot the candidate effector clusters
+foc_tree_6 <- gheatmap(foc_tree_5, foc_heat_df, offset=0.02, colnames=T, colnames_angle=90, hjust=0.6, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
                         low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
@@ -1613,21 +1723,16 @@ foc_tree_4 <- gheatmap(foc_tree_3, foc_heat_df, offset=0.008, colnames=T, colnam
                                    size = 8,
                                    colour = "white" )) +
   coord_cartesian(clip = "off")
-```
 
-    ## Scale for fill is already present.
-    ## Adding another scale for fill, which will replace the existing scale.
-
-``` r
 # plot the tree
-plot(foc_tree_4)
+plot(foc_tree_6)
 ```
 
 ![](AnalysisCandidateEffectorSets_files/figure-gfm/cubense%20effector%20distib-1.png)<!-- -->
 
 ``` r
 # save the tree
-ggsave("HeatmapAndPhylo_CubenseOnly.png", width = 20, height = 10)
+ggsave("HeatmapAndPhylo_BananaPathOnly.png", width = 20, height = 10)
 ```
 
 We can see that the effector profiles differ based on race and overall
@@ -1635,17 +1740,133 @@ tef1 phylogeny. Interestingly there is one candidate which is shared
 across the R1 and suspected STR4 isolates but not found in the TR4
 isolates - cognate R gene?
 
-I think it is interesting, though we cannot do any really significant
-stats on this, to look at candidate effector and mimp content among the
-race groups.
+Further, Foc1_60 displays quite a reduced CEC profile compared to the
+other R1 isolates, inlcuding N2 (from the same tef lineage).
 
-I was expecting to see a fairly similar number of mimps and candidate
-effectors among the TR4 isolates, as they are from a monophyletic clade
-in tef and rbp2 phylos, but number of candidates varies. I am thinking
-it may be due to assembly quality too? Looking at the Foa isolates is a
-good way to do this, as the R4 and R2 assemblies are from the same
-isolates but diff versions prepared by diff people using different
-methods.
+I’ll just quickly plot total CEC count per isolate to see if it as an
+outlier.
+
+``` r
+# ---- prepare the data ---- #
+#identify all rows in the metadata which do not contain cubense 
+foc_stats_plot_data  <- subset(metadata, grepl("Fo._fsp._cubense|Fo._fsp._apii|Fo._fsp._lactucae|Fo._fsp._coriandrii_|F._sacchari|SY-2|Fo._fsp._niveum|Fo._Fo47", label)) %>%
+  drop_na(no._CECs) 
+#subset just tip labels
+
+new_labels <- c("F. oxysporum fsp. coriandrii" = "Fo. fsp.\ncoriandrii","F. oxysporum fsp. apii" = "Fo. fsp.\napii", "F. oxysporum fsp. lactucae" = "Fo. fsp.\nlactucae","F. oxysporum fsp. cubense" = "Fo. fsp.\ncubense", "F. oxysporum fsp. endophyte" = "Fo.\nendo-\nphyte", "F. oxysporum fsp. niveum" = "Fo. fsp.\nniveum", "F. sacchari" = "F. sacchari" , "Fusarium" = "un-\nknown" )
+
+# ---- build the plot ---- #
+#Generate scale for Assembly size data 
+
+foc_stats_plot <- ggplot(foc_stats_plot_data, aes(x= reorder(isolate_code, no._CECs), y=no._CECs)) + # plot race and mimp/candidate effector count
+  geom_point(aes(colour = race, 
+                 size = genome_size),
+           position= 'dodge',                          #Ensure the bars are not stacked. 
+           stat='identity')+      #Add the mimp or predicted effector content. 
+  scale_color_manual("Race", values=c(
+             "np" = "bisque",
+             "Race 1" = "gold2",
+             "Race 2" = "yellow3",
+             "Race 3" = "lightblue",
+             "Race 4" = "navy",
+             "Tropical Race 4" = "green4"), 
+             na.value = "grey20") + #for some reason the labels have to be written the other way round...?
+  scale_size_binned("Genome\nassembly size") +
+  facet_grid( ~ reorder(full_name, no._CECs),
+              labeller = as_labeller(new_labels),  # becuase the reorder has changed the name of the faceting variable, i have to used as_labeller instead!
+             scales = "free_x",                        # Let the x axis vary across facets.
+             space = "free_x",                         # Let the width of facets vary and force all bars to have the same width.
+             switch = "x") +                            # Move the facet labels to the bottom.
+  theme_bw()+
+  theme(legend.box="hortizontal",
+        legend.position = "right")+
+  xlab("") +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())+
+  theme(axis.text.x = element_text(angle = 90,         #Adjust the text orientation on the x axis
+                                   vjust = 0.5, 
+                                   hjust=1,
+                                   size = 12))+
+  theme(axis.text = element_text(size = 12))+
+  theme(strip.text = element_text(size = 10)) + # shrink the text because it keeps getting cut
+  scale_y_continuous(name= "Total number of Candidate\nEffector Clusters") #Increase ticks on Y axis.
+                    
+#plot it 
+plot(foc_stats_plot)
+```
+
+![](AnalysisCandidateEffectorSets_files/figure-gfm/plot%20of%20CEC%20count-1.png)<!-- -->
+
+``` r
+# save it
+ggsave("./CecDistribinFspOfInterest.png", width = 16, height = 7)
+```
+
+What does the distribution of clusters look like in terms of numbers?
+How many are shared among the differnt races of Foc?
+
+``` r
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Foc tr4 rows
+heatmap_Foc_TR4_only <- subset(CEC_binary_df, grepl("Fo._fsp._cubense_B2|Fo._fsp._cubense_C1HIR_9889|Fo._fsp._cubense_58|Fo._fsp._cubense_NRRL_54006|Fo._fsp._cubense_Pers4|Fo._fsp._cubense_UK0001", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foc_TR4_only_shared <- heatmap_Foc_TR4_only %>%
+  select_if(colSums(heatmap_Foc_TR4_only) >= nrow(heatmap_Foc_TR4_only))
+# count the number of columns 
+ncol(heatmap_Foc_TR4_only_shared)
+```
+
+    ## [1] 38
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foc tr4 specific matrix
+heatmap_Foc_TR4_only_drop_0 <- heatmap_Foc_TR4_only[, colSums(heatmap_Foc_TR4_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Foc_TR4_only_drop_0), names(heatmap_Foc_TR4_only_shared))
+```
+
+``` r
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Foc tr4 rows
+heatmap_Foc_TR4_only <- subset(CEC_binary_df, grepl("Fo._fsp._cubense_B2|Fo._fsp._cubense_C1HIR_9889|Fo._fsp._cubense_58|Fo._fsp._cubense_NRRL_54006|Fo._fsp._cubense_Pers4|Fo._fsp._cubense_UK0001|Fo._fsp._cubense_VPRI44081|Fo._fsp._cubense_VPRI44082|Fo._fsp._cubense_VPRI44083", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foc_TR4_only_shared <- heatmap_Foc_TR4_only %>%
+  select_if(colSums(heatmap_Foc_TR4_only) >= nrow(heatmap_Foc_TR4_only))
+# count the number of columns 
+ncol(heatmap_Foc_TR4_only_shared)
+```
+
+    ## [1] 27
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foc tr4 specific matrix
+heatmap_Foc_TR4_only_drop_0 <- heatmap_Foc_TR4_only[, colSums(heatmap_Foc_TR4_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Foc_TR4_only_drop_0), names(heatmap_Foc_TR4_only_shared))
+```
+
+``` r
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Foc tr4 rows
+heatmap_Foc_TR4_only <- subset(CEC_binary_df, grepl("Fo._fsp._cubense_VPRI44081|Fo._fsp._cubense_VPRI44082|Fo._fsp._cubense_VPRI44083", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Foc_TR4_only_shared <- heatmap_Foc_TR4_only %>%
+  select_if(colSums(heatmap_Foc_TR4_only) >= nrow(heatmap_Foc_TR4_only))
+# count the number of columns 
+ncol(heatmap_Foc_TR4_only_shared)
+```
+
+    ## [1] 38
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foc tr4 specific matrix
+heatmap_Foc_TR4_only_drop_0 <- heatmap_Foc_TR4_only[, colSums(heatmap_Foc_TR4_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Foc_TR4_only_drop_0), names(heatmap_Foc_TR4_only_shared))
+```
 
 ### Candidate effector cluster distribution in Fo. fsp. lactucae and Fo. fsp. apii
 
@@ -1657,6 +1878,10 @@ foa_c_set_df <- subset(metadata, !grepl("Fo._fsp._coriandrii|Fo._fsp._apii|Fo._F
 foa_c_set <- data.frame("label" = foa_c_set_df[,c("label")])
 # convert it to a list 
 foa_c_set_2 <- paste(foa_c_set$label, sep = ",")
+
+# subset race data
+foa_c_set_df_race <- data.frame("race" = metadata[,c("race")] )
+rownames(foa_c_set_df_race) <- metadata$label
 
 # ---- subset heatmap data ---- #
 # reduce the white space in the heatmap but filtering columns where there is no data for foc
@@ -1680,17 +1905,36 @@ foa_c_tree <- ggtree(tree_reduced, ladderize = T ) %<+% metadata
 # now make the tree pretty 
 foa_c_tree_2 <- foa_c_tree +  
   #geom_tiplab(aes(label = full_name), offset = 0.00001) +
-  geom_tiplab(aes(label = fsp), color = "grey20", offset = 0.0003, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.002, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), offset = 0.0042, linetype = "blank", geom = "text", align = TRUE)+
+  geom_tiplab(aes(label = fsp), color = "grey20", offset = 0.0003, linetype = "blank", geom = "text", align = F) +
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0025, linetype = "blank", geom = "text", align = TRUE) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 60), nudge_x = -0.0008) +
   geom_tippoint(aes(shape = source), size = 3) +
   geom_rootedge() +
   theme(legend.position = "bottom")
-
-#add extra scale so we can plot fsp with colour
+# ---- add race data ---- #
+#add extra scale so we can plot race with colour
 foa_c_tree_3 <- foa_c_tree_2 + new_scale_fill()
+
+foa_c_tree_4 <- gheatmap(foa_c_tree_3, foa_c_set_df_race, 
+               offset = 0.006, 
+               width = 0.1,
+               color = "grey",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Race",
+                    values = c("bisque", "yellow3", "lightblue" ,"navy"), na.value = "white") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.box = "horizontal", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 2)))
+
+# ---- add candidate effector clusters ---- #
+
+#add extra scale so we can plot race with colour
+foa_c_tree_5 <- foa_c_tree_4 + new_scale_fill()
+
 # add race data
-foa_c_tree_4 <- gheatmap(foa_c_tree_3, foa_c_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
+foa_c_tree_6 <- gheatmap(foa_c_tree_5, foa_c_heat_df, offset=0.007, colnames=T, colnames_angle=90, hjust=0.4, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 10)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
                         low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
@@ -1708,14 +1952,8 @@ foa_c_tree_4 <- gheatmap(foa_c_tree_3, foa_c_heat_df, offset=0.0065, colnames=T,
                                    size = 8,
                                    colour = "white" )) +
   coord_cartesian(clip = "off") 
-```
-
-    ## Scale for fill is already present.
-    ## Adding another scale for fill, which will replace the existing scale.
-
-``` r
 # plot the tree
-plot(foa_c_tree_4)
+plot(foa_c_tree_6)
 ```
 
 ![](AnalysisCandidateEffectorSets_files/figure-gfm/coriandrii%20and%20apii%20effector%20distib-1.png)<!-- -->
@@ -1743,6 +1981,10 @@ fola_set <- data.frame("label" = fola_set_df[,c("label")])
 # convert it to a list 
 fola_set_2 <- paste(fola_set$label, sep = ",")
 
+# subset race data
+fola_set_df_race <- data.frame("race" = metadata[,c("race")] )
+rownames(fola_set_df_race) <- metadata$label
+
 # ---- subset fola heatmap data ---- #
 # reduce the white space in the heatmap but filtering columns where there is no data for foc
 # first we extract only the foc rows using the same approach as for the metadata, but instead we perform on the binary matrix
@@ -1765,17 +2007,36 @@ fola_tree <- ggtree(tree_reduced, ladderize = T ) %<+% metadata
 # now make the tree pretty 
 fola_tree_2 <- fola_tree +  
   geom_tiplab(aes(label = fsp), offset = 0.0003) +
-  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.002, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), offset = 0.0042, linetype = "blank", geom = "text", align = TRUE)+
+  geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0018, linetype = "blank", geom = "text", align = TRUE) +
   geom_tippoint(aes(shape = source), size = 3) +
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 40), nudge_x = -0.00039) +
   geom_rootedge() +
   theme(legend.position = "bottom")
 
-#add extra scale so we can plot fsp with colour
+# ---- add race data ---- #
+#add extra scale so we can plot race with colour
 fola_tree_3 <- fola_tree_2 + new_scale_fill()
 
+fola_tree_4 <- gheatmap(fola_tree_3, fola_set_df_race, 
+               offset = 0.0028, 
+               width = 0.1,
+               color = "grey",
+               colnames = FALSE) +
+  scale_fill_manual(name = "Race",
+                    values = c("bisque", "gold4", "navy"), na.value = "white") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.box = "horizontal", legend.margin = margin())+
+  guides(shape = guide_legend(override.aes = list(size = 2)))
+
+# ---- add candidate effector clusters ---- #
+
+#add extra scale so we can plot race with colour
+fola_tree_5 <- fola_tree_4 + new_scale_fill()
+
 # add race data
-fola_tree_4 <- gheatmap(fola_tree_3, fola_heat_df, offset=0.0065, colnames=T, colnames_angle=90, hjust=1, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
+fola_tree_6 <- gheatmap(fola_tree_5, fola_heat_df, offset=0.0035, colnames=T, colnames_angle=90, hjust=0.2, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 10)  +
   scale_fill_continuous(name = "Presence/\nAbsence",
                         low = "grey90", high = "black",
                         breaks = c("Absent","Present"),
@@ -1793,14 +2054,9 @@ fola_tree_4 <- gheatmap(fola_tree_3, fola_heat_df, offset=0.0065, colnames=T, co
                                    size = 8,
                                    colour = "white" )) +
   coord_cartesian(clip = "off") 
-```
 
-    ## Scale for fill is already present.
-    ## Adding another scale for fill, which will replace the existing scale.
-
-``` r
 # plot the tree
-plot(fola_tree_4)
+plot(fola_tree_6)
 ```
 
 ![](AnalysisCandidateEffectorSets_files/figure-gfm/lactucae%20effector%20distib-1.png)<!-- -->
@@ -1839,13 +2095,14 @@ session_data
     ## other attached packages:
     ##  [1] circlize_0.4.15       pheatmap_1.0.12       ggnewscale_0.4.9     
     ##  [4] RColorBrewer_1.1-3    textshape_1.7.3       ComplexHeatmap_2.15.4
-    ##  [7] ggtreeExtra_1.13.0    ggtree_3.10.0         phytools_2.1-1       
-    ## [10] maps_3.4.2            ape_5.7-1             nortest_1.0-4        
-    ## [13] ggpubr_0.6.0          viridis_0.6.5         viridisLite_0.4.2    
-    ## [16] ggthemes_5.0.0        lubridate_1.9.3       forcats_1.0.0        
-    ## [19] stringr_1.5.1         purrr_1.0.2           readr_2.1.5          
-    ## [22] tibble_3.2.1          ggplot2_3.4.4         tidyverse_2.0.0      
-    ## [25] tidytree_0.4.6        tidyr_1.3.1           dplyr_1.1.4          
+    ##  [7] treeio_1.26.0         ggtreeExtra_1.13.0    ggtree_3.10.0        
+    ## [10] phytools_2.1-1        maps_3.4.2            ape_5.7-1            
+    ## [13] nortest_1.0-4         ggpubr_0.6.0          viridis_0.6.5        
+    ## [16] viridisLite_0.4.2     ggthemes_5.0.0        lubridate_1.9.3      
+    ## [19] forcats_1.0.0         stringr_1.5.1         purrr_1.0.2          
+    ## [22] readr_2.1.5           tibble_3.2.1          ggplot2_3.4.4        
+    ## [25] tidyverse_2.0.0       tidytree_0.4.6        tidyr_1.3.1          
+    ## [28] dplyr_1.1.4          
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] mnormt_2.1.1            gridExtra_2.3           phangorn_2.11.1        
@@ -1866,18 +2123,18 @@ session_data
     ## [46] Matrix_1.6-5            igraph_1.5.1            timechange_0.3.0       
     ## [49] tidyselect_1.2.0        rstudioapi_0.15.0       abind_1.4-5            
     ## [52] yaml_2.3.8              doParallel_1.0.17       codetools_0.2-19       
-    ## [55] lattice_0.22-5          treeio_1.26.0           withr_3.0.0            
-    ## [58] coda_0.19-4             evaluate_0.23           gridGraphics_0.5-1     
-    ## [61] pillar_1.9.0            carData_3.0-5           stats4_4.3.1           
-    ## [64] foreach_1.5.2           ggfun_0.1.4             generics_0.1.3         
-    ## [67] hms_1.1.3               S4Vectors_0.40.2        munsell_0.5.0          
-    ## [70] scales_1.3.0            glue_1.7.0              scatterplot3d_0.3-44   
-    ## [73] lazyeval_0.2.2          tools_4.3.1             data.table_1.15.0      
-    ## [76] ggsignif_0.6.4          fs_1.6.3                cowplot_1.1.3          
-    ## [79] fastmatch_1.1-4         colorspace_2.1-0        nlme_3.1-164           
-    ## [82] patchwork_1.2.0         cli_3.6.2               textshaping_0.3.7      
-    ## [85] fansi_1.0.6             expm_0.999-9            gtable_0.3.4           
-    ## [88] rstatix_0.7.2           yulab.utils_0.1.4       digest_0.6.34          
-    ## [91] BiocGenerics_0.48.1     ggplotify_0.1.2         farver_2.1.1           
-    ## [94] rjson_0.2.21            memoise_2.0.1           htmltools_0.5.7        
-    ## [97] lifecycle_1.0.4         GlobalOptions_0.1.2     MASS_7.3-60.0.1
+    ## [55] lattice_0.22-5          withr_3.0.0             coda_0.19-4            
+    ## [58] evaluate_0.23           gridGraphics_0.5-1      pillar_1.9.0           
+    ## [61] carData_3.0-5           stats4_4.3.1            foreach_1.5.2          
+    ## [64] ggfun_0.1.4             generics_0.1.3          hms_1.1.3              
+    ## [67] S4Vectors_0.40.2        munsell_0.5.0           scales_1.3.0           
+    ## [70] glue_1.7.0              scatterplot3d_0.3-44    lazyeval_0.2.2         
+    ## [73] tools_4.3.1             data.table_1.15.0       ggsignif_0.6.4         
+    ## [76] fs_1.6.3                cowplot_1.1.3           fastmatch_1.1-4        
+    ## [79] colorspace_2.1-0        nlme_3.1-164            patchwork_1.2.0        
+    ## [82] cli_3.6.2               textshaping_0.3.7       fansi_1.0.6            
+    ## [85] expm_0.999-9            gtable_0.3.4            rstatix_0.7.2          
+    ## [88] yulab.utils_0.1.4       digest_0.6.34           BiocGenerics_0.48.1    
+    ## [91] ggplotify_0.1.2         farver_2.1.1            rjson_0.2.21           
+    ## [94] memoise_2.0.1           htmltools_0.5.7         lifecycle_1.0.4        
+    ## [97] GlobalOptions_0.1.2     MASS_7.3-60.0.1
