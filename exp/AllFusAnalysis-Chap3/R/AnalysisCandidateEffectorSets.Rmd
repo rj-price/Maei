@@ -13,7 +13,6 @@ Candidate effectors were generated as part of the Third Chapter of my thesis. Th
 
 ```{r libraries, echo=FALSE, include=FALSE}
 # # ---- Install required packages ---- #
-# install.packages("ggtree")
 # if (!requireNamespace("BiocManager", quietly = TRUE))
 #   install.packages("BiocManager")
 # BiocManager::install("ggtree")
@@ -110,7 +109,7 @@ m <- MRCA(tree, 48)
 tree_with_group <- groupClade(tree, m)
 
 # ---- Build tree skeleton ---- #
-p <- ggtree(tree, ladderize = T)  %<+% metadata
+p <- ggtree(tree, ladderize = F)  %<+% metadata
 
 # Adjust the branch length for "F._graminearum_PH-1"
 p$data[p$data$node %in% node_number, "x"] <- mean(p$data$x)
@@ -138,7 +137,7 @@ p1 <- p +
 p2 <- p + 
   geom_highlight(node = 88, fill = "mistyrose") + # colour the Fs node
   geom_highlight(node= 49, fill = "lemonchiffon1" ) + # colour the fo node
-  geom_treescale(x = 0, y = 1, width = 0.004) + 
+  geom_treescale(x = 0, y = 1.5, width = 0.004) + 
   geom_tiplab(aes(label = full_ID), offset = 0.0004) +
  # geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0045, linetype = "blank", geom = "text", align = TRUE) +
   geom_tiplab(aes(label = race), color = "grey20", offset = 0.012, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
@@ -1168,7 +1167,7 @@ Further, Foc1_60 displays quite a reduced CEC profile compared to the other R1 i
 I'll just quickly plot total CEC count per isolate to see if it as an outlier.
 
 
-```{r plot of CEC count, fig.width= 16, fig.height= 7}
+```{r plot of CEC count, fig.width= 16, fig.height= 10}
 # ---- prepare the data ---- #
 #identify all rows in the metadata which do not contain cubense 
 foc_stats_plot_data  <- subset(metadata, grepl("Fo._fsp._cubense|Fo._fsp._apii|Fo._fsp._lactucae|Fo._fsp._coriandrii_|F._sacchari|SY-2|Fo._fsp._niveum|Fo._Fo47", label)) %>%
@@ -1217,7 +1216,7 @@ foc_stats_plot <- ggplot(foc_stats_plot_data, aes(x= reorder(isolate_code, no._C
 plot(foc_stats_plot)
 
 # save it
-ggsave("./CecDistribinFspOfInterest.png", width = 16, height = 7)
+ggsave("./CecDistribinFspOfInterest.png", width = 16, height = 10)
 
 ```
 
@@ -1462,6 +1461,63 @@ ggsave("HeatmapAndPhylo_LactucaeOnly.png", width = 20, height = 10)
 
 ```
 
+Just to identify the differences in CECs between the Fola isolates, specifically the R4 isolates as AJ516 displays quite a different CEC profile from the other R4 assemblies. 
+
+All Fola isolates:
+```{r Fo lactucae group CEC counts}
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Foc tr4 rows
+heatmap_Fola_only <- subset(CEC_binary_df, grepl("Fo._fsp._lactucae", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fola_only_shared <- heatmap_Fola_only %>%
+  select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
+# count the number of columns 
+ncol(heatmap_Fola_only_shared)
+
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foc tr4 specific matrix
+heatmap_Fola_only_drop_0 <- heatmap_Fola_only[, colSums(heatmap_Fola_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Fola_only_drop_0), names(heatmap_Fola_only_shared))
+```
+
+Fola R4 isolates:
+
+```{r Fo lactucae R4 group CEC counts}
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Fola r4 rows
+heatmap_Fola_only <- subset(CEC_binary_df, grepl("Fo._fsp._lactucae_AJ516|Fo._fsp._lactucae_AJ592|Fo._fsp._lactucae_AJ705", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fola_only_shared <- heatmap_Fola_only %>%
+  select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
+# count the number of columns 
+ncol(heatmap_Fola_only_shared)
+
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Fola r4 specific matrix
+heatmap_Fola_only_drop_0 <- heatmap_Fola_only[, colSums(heatmap_Fola_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Fola_only_drop_0), names(heatmap_Fola_only_shared))
+```
+
+```{r Fo lactucae R1 group CEC counts}
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Fola r1 ows
+heatmap_Fola_only <- subset(CEC_binary_df, grepl("Fo._fsp._lactucae_AJ718|Fo._fsp._lactucae_AJ865|Fo._fsp._lactucae_AJ520", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fola_only_shared <- heatmap_Fola_only %>%
+  select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
+# count the number of columns 
+ncol(heatmap_Fola_only_shared)
+
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Fola r4 specific matrix
+heatmap_Fola_only_drop_0 <- heatmap_Fola_only[, colSums(heatmap_Fola_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Fola_only_drop_0), names(heatmap_Fola_only_shared))
+
+ncol(heatmap_Fola_only_drop_0)
+```
 
 ### Misc
 

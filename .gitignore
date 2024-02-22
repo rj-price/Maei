@@ -21,6 +21,10 @@ exp/SY-2_assembly_V2
 exp/TEF-PhyloOfIsolates
 exp/AllFusAnalysis-Chap3/BlastOfNRsetAgaintsGenomes
 exp/AllFusAnalysis-Chap3/Maei
+exp/AllFusAnalysis-Chap3/compareToLactucaeRNAseq/
+exp/AllFusAnalysis-Chap3/reciprocalBLAST-TNAU_vs_MaeiFusCEs/
+exp/AllFusAnalysis-Chap3/tnauCEs_vs_FusBananaPaths/
+
 README.html
 LICENSE.html
 .Rproj.user

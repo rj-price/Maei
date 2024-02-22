@@ -2066,6 +2066,56 @@ plot(fola_tree_6)
 ggsave("HeatmapAndPhylo_LactucaeOnly.png", width = 20, height = 10)
 ```
 
+Just to identify the differences in CECs between the Fola isolates,
+specifically the R4 isolates as AJ516 displays quite a different CEC
+profile from the other R4 assemblies.
+
+All Fola isolates:
+
+``` r
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Foc tr4 rows
+heatmap_Fola_only <- subset(CEC_binary_df, grepl("Fo._fsp._lactucae", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fola_only_shared <- heatmap_Fola_only %>%
+  select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
+# count the number of columns 
+ncol(heatmap_Fola_only_shared)
+```
+
+    ## [1] 56
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foc tr4 specific matrix
+heatmap_Fola_only_drop_0 <- heatmap_Fola_only[, colSums(heatmap_Fola_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Fola_only_drop_0), names(heatmap_Fola_only_shared))
+```
+
+Fola R4 isolates:
+
+``` r
+# ---- Foc tr4 monophyletic group CEC counts ---- #
+# subset only the Foc tr4 rows
+heatmap_Fola_only <- subset(CEC_binary_df, grepl("Fo._fsp._lactucae_AJ516|Fo._fsp._lactucae_AJ592|Fo._fsp._lactucae_AJ705", rownames(CEC_binary_df)))
+  # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
+heatmap_Fola_only_shared <- heatmap_Fola_only %>%
+  select_if(colSums(heatmap_Fola_only) >= nrow(heatmap_Fola_only))
+# count the number of columns 
+ncol(heatmap_Fola_only_shared)
+```
+
+    ## [1] 77
+
+``` r
+# -- identify which CECs are unique 
+# first drop all the columns where all values == 0 in the Foc tr4 specific matrix
+heatmap_Fola_only_drop_0 <- heatmap_Fola_only[, colSums(heatmap_Fola_only != 0) > 0]
+#next use set diff to identify the different columns 
+not_shared_cols <- setdiff(names(heatmap_Fola_only_drop_0), names(heatmap_Fola_only_shared))
+```
+
 ### Misc
 
 ``` r
@@ -2074,13 +2124,13 @@ session_data <- sessionInfo()
 session_data
 ```
 
-    ## R version 4.3.1 (2023-06-16)
-    ## Platform: x86_64-apple-darwin20 (64-bit)
-    ## Running under: macOS Ventura 13.1
+    ## R version 4.3.2 (2023-10-31)
+    ## Platform: aarch64-apple-darwin20 (64-bit)
+    ## Running under: macOS Sonoma 14.1.2
     ## 
     ## Matrix products: default
-    ## BLAS:   /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/lib/libRblas.0.dylib 
-    ## LAPACK: /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+    ## BLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRblas.0.dylib 
+    ## LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
     ## 
     ## locale:
     ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -2093,12 +2143,12 @@ session_data
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] circlize_0.4.15       pheatmap_1.0.12       ggnewscale_0.4.9     
+    ##  [1] circlize_0.4.15       pheatmap_1.0.12       ggnewscale_0.4.10    
     ##  [4] RColorBrewer_1.1-3    textshape_1.7.3       ComplexHeatmap_2.15.4
     ##  [7] treeio_1.26.0         ggtreeExtra_1.13.0    ggtree_3.10.0        
     ## [10] phytools_2.1-1        maps_3.4.2            ape_5.7-1            
     ## [13] nortest_1.0-4         ggpubr_0.6.0          viridis_0.6.5        
-    ## [16] viridisLite_0.4.2     ggthemes_5.0.0        lubridate_1.9.3      
+    ## [16] viridisLite_0.4.2     ggthemes_5.1.0        lubridate_1.9.3      
     ## [19] forcats_1.0.0         stringr_1.5.1         purrr_1.0.2          
     ## [22] readr_2.1.5           tibble_3.2.1          ggplot2_3.4.4        
     ## [25] tidyverse_2.0.0       tidytree_0.4.6        tidyr_1.3.1          
@@ -2107,34 +2157,34 @@ session_data
     ## loaded via a namespace (and not attached):
     ##  [1] mnormt_2.1.1            gridExtra_2.3           phangorn_2.11.1        
     ##  [4] rlang_1.1.3             magrittr_2.0.3          clue_0.3-65            
-    ##  [7] GetoptLong_1.0.5        matrixStats_1.2.0       compiler_4.3.1         
+    ##  [7] GetoptLong_1.0.5        matrixStats_1.2.0       compiler_4.3.2         
     ## [10] mgcv_1.9-1              systemfonts_1.0.5       png_0.1-8              
     ## [13] vctrs_0.6.5             combinat_0.0-8          quadprog_1.5-8         
     ## [16] shape_1.4.6             pkgconfig_2.0.3         crayon_1.5.2           
-    ## [19] fastmap_1.1.1           magick_2.8.2            backports_1.4.1        
-    ## [22] labeling_0.4.3          utf8_1.2.4              rmarkdown_2.25         
-    ## [25] tzdb_0.4.0              ragg_1.2.7              xfun_0.41              
-    ## [28] cachem_1.0.8            aplot_0.2.2             clusterGeneration_1.3.8
-    ## [31] jsonlite_1.8.8          highr_0.10              cluster_2.1.6          
-    ## [34] broom_1.0.5             parallel_4.3.1          R6_2.5.1               
-    ## [37] stringi_1.8.3           car_3.1-2               numDeriv_2016.8-1.1    
-    ## [40] Rcpp_1.0.12             iterators_1.0.14        knitr_1.45             
-    ## [43] optimParallel_1.0-2     IRanges_2.36.0          splines_4.3.1          
-    ## [46] Matrix_1.6-5            igraph_1.5.1            timechange_0.3.0       
-    ## [49] tidyselect_1.2.0        rstudioapi_0.15.0       abind_1.4-5            
-    ## [52] yaml_2.3.8              doParallel_1.0.17       codetools_0.2-19       
-    ## [55] lattice_0.22-5          withr_3.0.0             coda_0.19-4            
-    ## [58] evaluate_0.23           gridGraphics_0.5-1      pillar_1.9.0           
-    ## [61] carData_3.0-5           stats4_4.3.1            foreach_1.5.2          
-    ## [64] ggfun_0.1.4             generics_0.1.3          hms_1.1.3              
-    ## [67] S4Vectors_0.40.2        munsell_0.5.0           scales_1.3.0           
-    ## [70] glue_1.7.0              scatterplot3d_0.3-44    lazyeval_0.2.2         
-    ## [73] tools_4.3.1             data.table_1.15.0       ggsignif_0.6.4         
-    ## [76] fs_1.6.3                cowplot_1.1.3           fastmatch_1.1-4        
-    ## [79] colorspace_2.1-0        nlme_3.1-164            patchwork_1.2.0        
-    ## [82] cli_3.6.2               textshaping_0.3.7       fansi_1.0.6            
-    ## [85] expm_0.999-9            gtable_0.3.4            rstatix_0.7.2          
-    ## [88] yulab.utils_0.1.4       digest_0.6.34           BiocGenerics_0.48.1    
-    ## [91] ggplotify_0.1.2         farver_2.1.1            rjson_0.2.21           
-    ## [94] memoise_2.0.1           htmltools_0.5.7         lifecycle_1.0.4        
-    ## [97] GlobalOptions_0.1.2     MASS_7.3-60.0.1
+    ## [19] fastmap_1.1.1           backports_1.4.1         labeling_0.4.3         
+    ## [22] utf8_1.2.4              rmarkdown_2.25          tzdb_0.4.0             
+    ## [25] ragg_1.2.7              xfun_0.42               cachem_1.0.8           
+    ## [28] aplot_0.2.2             clusterGeneration_1.3.8 jsonlite_1.8.8         
+    ## [31] highr_0.10              cluster_2.1.6           broom_1.0.5            
+    ## [34] parallel_4.3.2          R6_2.5.1                stringi_1.8.3          
+    ## [37] car_3.1-2               numDeriv_2016.8-1.1     Rcpp_1.0.12            
+    ## [40] iterators_1.0.14        knitr_1.45              optimParallel_1.0-2    
+    ## [43] IRanges_2.36.0          splines_4.3.2           Matrix_1.6-5           
+    ## [46] igraph_2.0.1.1          timechange_0.3.0        tidyselect_1.2.0       
+    ## [49] rstudioapi_0.15.0       abind_1.4-5             yaml_2.3.8             
+    ## [52] doParallel_1.0.17       codetools_0.2-19        lattice_0.22-5         
+    ## [55] withr_3.0.0             coda_0.19-4.1           evaluate_0.23          
+    ## [58] gridGraphics_0.5-1      pillar_1.9.0            carData_3.0-5          
+    ## [61] stats4_4.3.2            foreach_1.5.2           ggfun_0.1.4            
+    ## [64] generics_0.1.3          hms_1.1.3               S4Vectors_0.40.2       
+    ## [67] munsell_0.5.0           scales_1.3.0            glue_1.7.0             
+    ## [70] scatterplot3d_0.3-44    lazyeval_0.2.2          tools_4.3.2            
+    ## [73] data.table_1.15.0       ggsignif_0.6.4          fs_1.6.3               
+    ## [76] cowplot_1.1.3           fastmatch_1.1-4         colorspace_2.1-0       
+    ## [79] nlme_3.1-164            patchwork_1.2.0         cli_3.6.2              
+    ## [82] textshaping_0.3.7       fansi_1.0.6             expm_0.999-9           
+    ## [85] gtable_0.3.4            rstatix_0.7.2           yulab.utils_0.1.4      
+    ## [88] digest_0.6.34           BiocGenerics_0.48.1     ggplotify_0.1.2        
+    ## [91] farver_2.1.1            rjson_0.2.21            memoise_2.0.1          
+    ## [94] htmltools_0.5.7         lifecycle_1.0.4         GlobalOptions_0.1.2    
+    ## [97] MASS_7.3-60.0.1
