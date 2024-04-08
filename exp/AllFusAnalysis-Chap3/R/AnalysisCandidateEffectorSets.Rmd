@@ -52,6 +52,7 @@ library(RColorBrewer)
 library(ggnewscale)
 library(pheatmap)
 library(circlize)
+library(ggupset)
 ```
 
 
@@ -118,11 +119,11 @@ p$data[p$data$node %in% node_number, "x"] <- mean(p$data$x)
 # Useful for visualusing nodes etc 
 p_nodes <- p + 
   geom_text2(aes(label = parent), hjust = -0.1, size = 3)+ # add node names
-  geom_tiplab(aes(label = label), offset = 0.005) +
-  geom_cladelabel(node=node_number, label="Adjusted by: 0.03", 
-                  color='black') +
+  geom_tiplab(aes(label = label), offset = 0.008) +
+  geom_cladelabel(node=node_number, label="Adjusted by: 0.03", color='black') +
   coord_cartesian(clip = "off") # stop names being trimmed off
 
+p_nodes
 ```
 
 Now I have my basic tree, I can start to build something that will stand alone. First I added the metadata (full name, the isolate code, and race).
@@ -134,24 +135,33 @@ Now I have my basic tree, I can start to build something that will stand alone. 
 p1 <- p +
   xlim(0,0.045)
 
-p2 <- p + 
+p2 <- p +
+  geom_cladelabel(node = 88, label = "Group 1", offset = 0.018) +
+  geom_cladelabel(node = 80, label = "Group 2", offset = 0.02) +
+  geom_cladelabel(node = 77, label = "Group 3", offset = 0.018) +
+  geom_cladelabel(node = 75, label = "Group 4", offset = 0.018) +
+  geom_cladelabel(node = 67, label = "Group 5", offset = 0.018) +
+  geom_cladelabel(node = 64, label = "Group 6", offset = 0.018) +
+  geom_cladelabel(node = 59, label = "Group 7", offset = 0.018) +
+  geom_cladelabel(node = 55, label = "Group 8", offset = 0.018) +
   geom_highlight(node = 88, fill = "mistyrose") + # colour the Fs node
-  geom_highlight(node= 49, fill = "lemonchiffon1" ) + # colour the fo node
+  geom_highlight(node = 49, fill = "lemonchiffon1" ) + # colour the fo node
   geom_treescale(x = 0, y = 1.5, width = 0.004) + 
   geom_tiplab(aes(label = full_ID), offset = 0.0004) +
  # geom_tiplab(aes(label = isolate_code), color = "grey20", offset = 0.0045, linetype = "blank", geom = "text", align = TRUE) +
-  geom_tiplab(aes(label = race), color = "grey20", offset = 0.012, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
+  geom_tiplab(aes(label = race), color = "grey20", offset = 0.0239, linetype = "blank", geom = "text", align = TRUE, hjust = 1)+
   geom_tippoint(aes(shape = source), size = 2.5) +
   geom_rootedge() +
   theme(legend.position = "bottom" ) +
-  geom_cladelabel(node=node_number, label="Adjusted by: 0.03", offset = 0.008, color='black') + geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 60), nudge_x = -0.0012, nudge_y = -0.25) 
+  geom_cladelabel(node=node_number, label="Adjusted by: 0.03", offset = 0.011, color='black') + 
+  geom_nodelab(geom='label', aes(label=label, subset= !is.na(as.numeric(label)) & as.numeric(label)> 60), nudge_x = -0.0012, nudge_y = -0.25) 
 
 # Add extra scale so we can plot fsp with colour
 p3 <- p2 + new_scale_fill()
 
 # add race data
 p4 <- gheatmap(p3, fsp_df,
-               offset = 0.012, 
+               offset = 0.025, 
                width = 0.03,
                color = "grey20",
                colnames = FALSE) +
@@ -197,6 +207,11 @@ stats_data <- stats_data %>%
 
 # view the table for stats data
 knitr::kable(stats_data)
+
+sum(stats_data$mimps)
+sum(stats_data$candidate_effectors)
+
+summary(stats_data)
 ```
 
 The number of *mimps*,  candidate effectors identified, and genome sizes varies between genome assemblies. 
@@ -340,7 +355,7 @@ First, I have to prepare my data set. I used the metadata file loaded initially.
 ```{r stats final plot data }
 # ---- Prepare Data for plotting --- #
 #Extract the isolate, assembly size, total number of mimps and effectors columns.
-stats_plot_data <- select(metadata,"species", "species_group", "fsp", "isolate_code","genome_size","no._mimps","no._cand_effs") %>%
+stats_plot_data <- select(metadata,"species", "species_group", "fsp", "isolate_code","genome_size","no._mimps","no._cand_effs", "TefGroup") %>%
 #Rename the columns to reduce the long titles
   dplyr::rename(isolate=isolate_code,                                    
          mimps=no._mimps,
@@ -567,7 +582,7 @@ cluster_distib <- dplyr::rename(cluster_distib, no._CECs = value)
 metadata <- merge(metadata, cluster_distib, by.x = "label", by.y = "name", all.x = TRUE)
 
 #subset the metadata ft 
-CEC_metadata <- select(metadata,"species", "species_group", "fsp", "race", "isolate_code","genome_size","no._mimps","no._cand_effs", "no._CECs")
+CEC_metadata <- select(metadata,"species", "species_group", "fsp", "race", "isolate_code","genome_size","no._mimps","no._cand_effs", "no._CECs", "TefGroup")
 
 # print it nicely
 knitr::kable(CEC_metadata)
@@ -667,6 +682,8 @@ CEC_count_plot <- ggplot(CEC_count, aes(x = Count)) +
 #plot it
 plot(CEC_count_plot)
 
+ggsave("CEC_count_plot.png")
+
 ```
 
 The majority of the clusters have 0 or 1 CE in them, with only a handful having > 500 CEs.
@@ -691,7 +708,7 @@ Next, I built the plot. I started using `pheatmap` but that didn't have all the 
 # ---- Add metadata to heatmap ---- #
 
 # first, select the data we want from metadata and make the "label column in metadata the row names"
-heatmap_metadf <- select(metadata,"label","no._mimps","no._cand_effs", "no._CECs", "race", "full_name", "isolate_code") %>%
+heatmap_metadf <- select(metadata,"label","no._mimps","no._cand_effs", "no._CECs", "race", "full_name", "isolate_code", "TefGroup") %>%
   dplyr::rename(name=label,
                 Species =full_name,
                 CECs=no._CECs,
@@ -736,7 +753,17 @@ anno_colours_r <- list(
              "Race 2" = "yellow3",
              "Race 3" = "lightblue",
              "Race 4" = "navy",
-             "Tropical Race 4" = "green4"))
+             "Tropical Race 4" = "green4"),
+           "Tef1a Group" = c(
+             "1" = "lightpink",
+             "2" = "darkcyan", 
+             "3" = "maroon",
+             "4" = "aquamarine",
+             "5" = "chartreuse",
+             "6" = "violet",
+             "7" = "royalblue",
+             "8" = "darksalmon"
+           ))
 
 anno_colours_cec = colorRamp2(c(0, 150), c("white", "darkorchid4"))
 anno_colours_ce = colorRamp2(c(0, 600), c("white", "darkolivegreen"))
@@ -763,8 +790,9 @@ row_anno_l <- rowAnnotation(
 
 
 row_anno_r = rowAnnotation(
+  "Tef1a Group" = heatmap_metadf_ordered$TefGroup,
   "Species" = heatmap_metadf_ordered$Species, 
-  "Race" = heatmap_metadf_ordered$race, 
+  "Race" = heatmap_metadf_ordered$race,
   col = anno_colours_r, 
   na_col = NA, 
   gp = gpar(col = "white"))
@@ -934,7 +962,7 @@ not_shared_cols <- setdiff(names(heatmap_Foa_r3r4_only_drop_0), names(heatmap_Fo
 
 Next, I want to look at coriandrii alone. How many core CECs between coriandrii and how many core CECs when you include apii? 
 
-```{CEC counts in coriandrii}
+```{r CEC counts in coriandrii}
 
 # ---- summarise the distribution of candidate effector clusters in coriandrii ---- #
 
@@ -1134,15 +1162,15 @@ foc_tree_5 <- foc_tree_4 + new_scale_fill()
 
 # plot the candidate effector clusters
 foc_tree_6 <- gheatmap(foc_tree_5, foc_heat_df, offset=0.02, colnames=T, colnames_angle=90, hjust=0.6, font.size=3, legend_title="Presence/\nAbsence", color = "grey",  width = 4)  +
-  scale_fill_continuous(name = "Presence/\nAbsence",
-                        low = "grey90", high = "black",
-                        breaks = c("Absent","Present"),
-                        na.value = "grey")+
   guides(fill = guide_colourbar(barwidth = 5, barheight = 1))+
   theme(legend.position = "bottom",
         legend.title = element_text(size = 12),
         legend.text = element_text(size = 12),
-        legend.box = "horizontal", legend.margin = margin())+
+        legend.box = "horizontal", legend.margin = margin()) +
+  scale_fill_continuous(name = "Presence/\nAbsence",
+                        low = "grey90", high = "black",
+                        breaks = c("Absent","Present"),
+                        na.value = "grey")+
    geom_treescale(x=0, y=0.1, width = 0.004) +
   guides(shape = guide_legend(override.aes = list(size = 2))) +
     theme(axis.text.x = element_text(angle = 90,         #Adjust the text orientation on the x axis
@@ -1159,6 +1187,37 @@ plot(foc_tree_6)
 ggsave("HeatmapAndPhylo_BananaPathOnly.png", width = 20, height = 10)
 
 ```
+
+```{r banana upset plot, fig.width= 10,  height = 6}
+# ---- Filter the data ---- #
+#prepare data for the upset using in inbuilt complex heatmap function.
+m <- make_comb_mat(t(foc_heat_df), mode = "distinct")
+
+# remove all sets with <2 shared CECs
+m <- m[comb_size(m) > 0]
+
+# ---- Build the upset plot ---- #
+UpSetCECofBanana <- UpSet(m, 
+      lwd = 1,
+      #comb_order = order(comb_size(m)), # control the order
+      bg_col = c("pink", "pink" ,"pink", "#FAFAD2", "grey90", "#FAFAD2","#F0E68C","#F0E68C", "#F0E68C","#F0E68C","#F0E68C","#F0E68C","grey90", "grey90", "#FAFAD2","grey90","bisque","grey90"),
+      top_annotation = upset_top_annotation(m, 
+    annotation_name_rot = 90,
+    annotation_name_side = "right",
+    axis_param = list(side = "right"),
+    add_numbers = TRUE),
+    right_annotation = upset_right_annotation(m, add_numbers = TRUE)
+      )
+
+plot(UpSetCECofBanana)
+
+#save it
+png(file="UpSetCECofBanana.png", width = 10, height = 6, unit = "in", res = 150)
+draw(UpSetCECofBanana)
+dev.off()
+
+```
+
 
 We can see that the effector profiles differ based on race and overall tef1 phylogeny. Interestingly there is one candidate which is shared across the R1 and suspected STR4 isolates but not found in the TR4 isolates - cognate R gene? 
 
@@ -1366,6 +1425,38 @@ ggsave("HeatmapAndPhylo_ApiiAndCoriandriiOnly.png", width = 20, height = 10)
 
 ```
 
+How are these CECs distributed across isolates?
+
+```{r fusarium of apii and coriandrii}
+
+# ---- Filter the data ---- #
+#prepare data for the upset using in inbuilt complex heatmap function.
+m <- make_comb_mat(t(foa_c_heat_df), mode = "distinct")
+
+# remove all sets with <2 shared CECs
+m <- m[comb_size(m) > 0]
+
+# ---- Build the upset plot ---- #
+UpSetCECofApii <- UpSet(m, 
+      lwd = 1,
+      comb_order = order(comb_size(m)), # control the order
+      bg_col = c("bisque", "#E3F5FF", "#BBC3F5", "#BBC3F5", "grey90","#FFF7B4","#FFF7B4","grey90"),
+      top_annotation = upset_top_annotation(m, 
+    annotation_name_rot = 90,
+    annotation_name_side = "right",
+    axis_param = list(side = "right"),
+    add_numbers = TRUE),
+    right_annotation = upset_right_annotation(m, add_numbers = TRUE)
+      )
+
+plot(UpSetCECofApii)
+
+#save it
+png(file="UpSetCECofApii.png", width = 10, height = 6, unit = "in", res = 150)
+draw(UpSetCECofApii)
+dev.off()
+
+```
 
 As I compared effector content between races for Foc, I also want to do the same thing for Fola. Again, I would have liked to performed some statistical analysis, but pretty much all blogs, posts, and papers I have come across have recommended not doing it with a such a small sample size. I have therefore just plotted the effector data for the Fola isolates. I also included matthiolae, as it appears to be in the same clade based on TEF, but displays a different candidate effector profiles.
 
@@ -1461,11 +1552,49 @@ ggsave("HeatmapAndPhylo_LactucaeOnly.png", width = 20, height = 10)
 
 ```
 
+
+```{r lactucae upset plot}
+# ---- Filter the data ---- #
+#subset only the lactucae data
+fola_upset_data <- subset(fola_heat_df, grepl("Fo._fsp._lactucae|Fo._Fo47", row.names(fola_heat_df)))
+fola_upset_data <- fola_upset_data[, colSums(fola_upset_data != 0) > 0]
+
+#prepare data for the upset using in inbuilt complex heatmap function.
+upset_fola_m <- make_comb_mat(t(fola_upset_data), mode = "distinct")
+
+# remove all sets with <2 shared CECs
+upset_fola_m <- upset_fola_m[comb_size(upset_fola_m) > 0]
+
+# ---- Build the upset plot ---- #
+UpSetCECofFola <- UpSet(upset_fola_m, 
+      lwd = 1,
+      comb_order = order(comb_size(upset_fola_m)), # control the order
+      bg_col = c("bisque", "#A2CD5A80", "#A2CD5A80","#556B2F80","#556B2F80","#A2CD5A80", "#556B2F80"),
+      top_annotation = upset_top_annotation(upset_fola_m, 
+    annotation_name_rot = 90,
+    annotation_name_side = "right",
+    axis_param = list(side = "right"),
+    add_numbers = TRUE),
+    right_annotation = upset_right_annotation(upset_fola_m, add_numbers = TRUE)
+      )
+
+
+
+plot(UpSetCECofFola)
+
+#save it
+png(file="UpSetCECofFola.png", width = 10, height = 6, unit = "in", res = 150)
+draw(UpSetCECofFola)
+dev.off()
+```
+
+
+
 Just to identify the differences in CECs between the Fola isolates, specifically the R4 isolates as AJ516 displays quite a different CEC profile from the other R4 assemblies. 
 
 All Fola isolates:
 ```{r Fo lactucae group CEC counts}
-# ---- Foc tr4 monophyletic group CEC counts ---- #
+# ---- Fola monophyletic group CEC counts ---- #
 # subset only the Foc tr4 rows
 heatmap_Fola_only <- subset(CEC_binary_df, grepl("Fo._fsp._lactucae", rownames(CEC_binary_df)))
   # count the number of rows where the column total is >= the number of Fo rows (a shared candidate effector cluster!)
