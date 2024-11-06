@@ -12,22 +12,22 @@
 #############################
 
 #PLEASE SET PATHS TO THE FOLLOWING DEPENDENCIES:
-Run_Bio_python=/home/u1983390/miniconda3/envs/biopythonEnv/bin/python3 #path to biopython
-Run_Augustus=/home/u1983390/miniconda3/envs/MaeiEnv/bin/augustus  #path to Augustus executable
-Run_getAnnoFasta=/home/u1983390/miniconda3/envs/MaeiEnv/bin/getAnnoFasta.pl #path to Augustus getAnnoFasta.pl
-Emboss_get_orf=/home/u1983390/miniconda3/bin/getorf #path to EMBOSS getorf executable
-Run_SignalP=/home/u1983390/apps/FoEC/signalp-4.1/signalp  #path to SignalP executable
-Run_EffectorP=/home/u1983390/apps/EffectorP-2.0-2.0.1/Scripts/EffectorP.py  #path to EffectorP.py
-Run_nhmmer=/home/u1983390/miniconda3/envs/hmmerEnv/bin/nhmmer #path to HMMER
-Run_AGAT_manage=/home/u1983390/miniconda3/bin/agat_sp_manage_attributes.pl
-Run_AGAT_extract=/home/u1983390/miniconda3/bin/agat_sp_extract_sequences.pl #Path to AGAT for extarcting cds from mimp-associated gene/ORF gff. 
-Run_cdhit=/usr/bin/cdhit #Path to cd-hit.
+Run_Bio_python=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/python3 #path to biopython
+Run_Augustus=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/augustus  #path to Augustus executable
+Run_getAnnoFasta=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/getAnnoFasta.pl #path to Augustus getAnnoFasta.pl
+Emboss_get_orf=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/getorf #path to EMBOSS getorf executable
+Run_SignalP=/mnt/shared/scratch/jnprice/apps/signalp-4.1/signalp  #path to SignalP executable
+Run_EffectorP=/mnt/shared/scratch/jnprice/apps/EffectorP-3.0/Scripts/EffectorP.py  #path to EffectorP.py
+Run_nhmmer=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/nhmmer #path to HMMER
+Run_AGAT_manage=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/agat_sp_manage_attributes.pl
+Run_AGAT_extract=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/agat_sp_extract_sequences.pl #Path to AGAT for extarcting cds from mimp-associated gene/ORF gff. 
+Run_cdhit=/mnt/shared/scratch/jnprice/apps/conda/envs/maei/bin/cdhit #Path to cd-hit.
 
 #PATHS TO MAEI ASSOCIATED SCRIPTS. 
-Mimp_finditer=/home/u1983390/Fusarium_data/MimpAssociatedEffectorIdent/Fo._of_Lettuce_Analysis/Maei_v5_Scripts/bin/Mimp_finditer.py #path to mimp_finditer.py script
-bed2gff=/home/u1983390/Fusarium_data/MimpAssociatedEffectorIdent/Fo._of_Lettuce_Analysis/Maei_v5_Scripts/bin/bed2gff.py #Bed to GFF file converter. 
-getORF2bed=/home/u1983390/Fusarium_data/MimpAssociatedEffectorIdent/Fo._of_Lettuce_Analysis/Maei_v5_Scripts/bin/getORF2bed.py #Convert getORF output to bed file. 
-ProcessingCDHIT=/home/u1983390/Fusarium_data/MimpAssociatedEffectorIdent/Fo._of_Lettuce_Analysis/Maei_v5_Scripts/bin/Processingcdhit.py #Script for processing the cd-hit output.
+Mimp_finditer=/mnt/shared/scratch/jnprice/apps/Maei/bin/Mimp_finditer.py #path to mimp_finditer.py script
+bed2gff=/mnt/shared/scratch/jnprice/apps/Maei/bin/bed2gff.py #Bed to GFF file converter. 
+getORF2bed=/mnt/shared/scratch/jnprice/apps/Maei/bin/getORF2bed.py #Convert getORF output to bed file. 
+ProcessingCDHIT=/mnt/shared/scratch/jnprice/apps/Maei/bin/Processingcdhit.py #Script for processing the cd-hit output.
 
 ##############################
 ###PLEASE DO NOT EDIT BELOW###

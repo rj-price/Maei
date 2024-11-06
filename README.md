@@ -22,7 +22,7 @@ The candidate effector fasta from each genome is then combined and clusterd  usi
 
 ### Dependencies
 
-Maei makes use of multiple bioinformatic tools and python modules, all of which will have to be configured at the top of the Maei.sh script.
+Maei makes use of multiple bioinformatic tools and python modules, **all of which will have to be configured at the top of the Maei.sh script**.
 
 All dependcies can be installed using Bioconda, and I recommend you create a conda enviroment specifically for Maei. 
 
@@ -38,6 +38,18 @@ The dependencies:
 * HMMER (3.3.1) 
 * AGAT (v1.0.0)
 * CD-HIT (version 4.6)
+
+To install dependencies (except SignalP and EffectorP) into a new Conda called `maei`:
+```bash
+# Get pipeline
+git clone https://github.com/rj-price/Maei.git 
+# Change to directory
+cd Maei
+# Create conda environment 
+conda env create -f environment.yml
+# Activate enviroment before running
+conda activate maei
+```
 
 ### Usage 
 
