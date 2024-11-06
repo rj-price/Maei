@@ -1,0 +1,18 @@
+name: maei
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bedtools==2.25.0
+  - samtools==0.1.19
+  - biopython
+  - pandas
+  - augustus==3.3.3 
+  - emboss==6.6.0
+  - hmmer==3.3.1
+  - agat==1.0.0
+  - cd-hit==4.6.6
+
+# SignalP and EffectorP only available from Anaconda defaults channel
+#  - effector-p==2.1
+#  - signalp==4.1
